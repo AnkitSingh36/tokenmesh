@@ -3,7 +3,7 @@
 > **Semantic token optimizer for LLM prompts.**  
 > Reduce Claude / GPT-4 token usage by **40–75%** with zero semantic loss.
 
-[![CI](https://github.com/yourusername/tokenmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/tokenmesh/actions)
+[![CI](https://github.com/AnkitSingh36/tokenmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/AnkitSingh36/tokenmesh/actions)
 [![PyPI](https://img.shields.io/pypi/v/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
 [![Python](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
