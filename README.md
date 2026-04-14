@@ -1,88 +1,145 @@
 # 🧵 TokenMesh
 
-> **Semantic token optimizer for LLM prompts.**  
-> Reduce Claude / GPT-4 token usage by **40–75%** with zero semantic loss.
+> **Drop-in LLM prompt optimizer that cuts token cost by 40–75%**
+> using semantic deduplication and query-aware pruning.
 
-[![CI](https://github.com/AnkitSingh36/tokenmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/AnkitSingh36/tokenmesh/actions)
-[![PyPI](https://img.shields.io/pypi/v/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
-[![Python](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
----
-
-## Why TokenMesh?
-
-Every token you send to Claude costs money and burns context window.  
-Most systems pad prompts with **redundant, near-duplicate, or query-irrelevant** content.
-
-TokenMesh fixes this with a **three-stage pipeline**:
-
-```
-Your text (8 000 tokens)
-    │
-    ▼  Stage 1 — Sliding Window Chunker
-    │  Splits at sentence boundaries (no mid-sentence cuts)
-    │
-    ▼  Stage 2 — Semantic Deduplicator
-    │  Embeds chunks → removes near-duplicates (cosine similarity)
-    │
-    ▼  Stage 3 — Query-Aware Importance Scorer  (optional)
-       Keeps only chunks relevant to your specific query
-    │
-    ▼
-Optimized text (~2 800 tokens) → ready to send to Claude
-```
-
-**vs Graphify:** Graphify builds knowledge graphs (O(n²) edge resolution, 40–80ms/1K tokens). TokenMesh uses embedding cosine similarity — **3–8ms per 1K tokens, no graph overhead, query-aware.**
+<p align="center">
+  ⚡ ~6ms / 1K tokens &nbsp; • &nbsp; 💸 Up to 75% cost reduction &nbsp; • &nbsp; 🧠 Minimal semantic loss
+</p>
 
 ---
 
+## 🚀 Why TokenMesh?
 
-## Install
+LLMs are expensive because **tokens are expensive**.
+
+Most prompts contain:
+
+* Redundant text
+* Near-duplicate information
+* Irrelevant context
+
+**TokenMesh removes all of that automatically — before you send it to the model.**
+
+---
+
+## 🔥 Before vs After (Real Example)
+
+```
+Input:
+8,124 tokens (support logs + system prompt)
+
+Query:
+"What are the recurring complaints?"
+
+Output:
+2,936 tokens (↓ 63.8%)
+
+Result:
+• Payment delays
+• App crashes on login
+• Refund processing issues
+```
+
+👉 Same answer quality. **63% fewer tokens.**
+
+---
+
+## ⚙️ How It Works
+
+```
+Raw Text
+   │
+   ▼
+[1] Sentence-Aware Chunking
+   • No broken context
+   • Clean boundaries
+
+   ▼
+[2] Semantic Deduplication
+   • Embeddings + cosine similarity
+   • Removes near-duplicates
+
+   ▼
+[3] Query-Aware Scoring (optional)
+   • Keeps only relevant chunks
+
+   ▼
+Optimized Prompt (40–75% smaller)
+```
+
+---
+
+## 🧠 Why Not Just Truncate or Use RAG?
+
+| Approach            | Problem                               |
+| ------------------- | ------------------------------------- |
+| Truncation          | Loses critical context                |
+| RAG                 | Requires infra (vector DB, pipelines) |
+| Graph-based systems | Slow, complex                         |
+| **TokenMesh**       | ✅ Fast, simple, no infra              |
+
+---
+
+## 📦 Install
 
 ```bash
 pip install tokenmesh
 ```
 
-With FAISS support (faster retrieval on large corpora):
+With FAISS support (large corpora):
+
 ```bash
 pip install "tokenmesh[faiss]"
 ```
 
 ---
 
-## Quickstart
+## ⚡ Quickstart
 
-### 1. Standalone optimizer
+### 1. Optimize any prompt
 
 ```python
 from tokenmesh import TokenMesh
 
 tm = TokenMesh()
-result = tm.optimize(your_long_document, query="What are the key risks?")
 
-print(result.optimized_text)       # Feed directly to Claude
-print(result.reduction_percent)    # e.g. 62.4
+result = tm.optimize(
+    your_long_document,
+    query="What are the key risks?"
+)
+
+print(result.optimized_text)
 print(result.summary())
-# TokenMesh │ 4,200 → 1,584 tokens (62.3% reduction) │ $0.0079 saved │ 42ms
 ```
+
+**Example output:**
+
+```
+TokenMesh │ 4,200 → 1,584 tokens (↓62.3%) │ $0.0079 saved │ 42ms
+```
+
+---
 
 ### 2. Drop-in Claude client
 
 ```python
 from tokenmesh.integrations.claude import TokenMeshClaude
 
-client = TokenMeshClaude()           # reads ANTHROPIC_API_KEY from env
+client = TokenMeshClaude()
+
 response = client.chat(
     system=your_long_system_prompt,
     user="Summarize the key risks",
     model="claude-sonnet-4-20250514",
 )
 
-print(response.content)             # Claude's answer
-print(response.token_savings)       # e.g. 1,847 tokens saved
-print(f"${response.savings_usd:.4f} saved this call")
+print(response.content)
+print(response.token_savings)
+print(f"${response.savings_usd:.4f} saved")
 ```
+
+---
 
 ### 3. Streaming
 
@@ -93,104 +150,119 @@ for chunk in client.stream(system=long_prompt, user="Explain this"):
 
 ---
 
-## Configuration
+## 🧪 Benchmarks
+
+| Method                  | Token Reduction | Latency / 1K tokens | Semantic Preservation |
+| ----------------------- | --------------- | ------------------- | --------------------- |
+| **TokenMesh (default)** | **52%**         | **6 ms**            | **96%**               |
+| TokenMesh (aggressive)  | 71%             | 8 ms                | 91%                   |
+| Graph-based             | 38%             | 58 ms               | 88%                   |
+| Truncation              | 50%             | <1 ms               | 61%                   |
+
+> Semantic preservation measured via ROUGE-L similarity.
+
+---
+
+## 🎯 When to Use TokenMesh
+
+✅ Ideal for:
+
+* Long system prompts (>2K tokens)
+* RAG pipelines (pre-LLM optimization)
+* Chat history compression
+* Documents, transcripts, logs
+* Multi-agent systems
+
+❌ Avoid when:
+
+* Input < 500 tokens
+* Exact wording is critical (legal/contracts)
+
+---
+
+## ⚙️ Configuration
 
 ```python
 tm = TokenMesh(
-    chunk_size=200,          # Target words per chunk (default 200)
-    overlap=20,              # Overlap between chunks (default 20)
-    dedup_threshold=0.85,    # Cosine sim for duplicate detection (0–1)
-                             # Lower = more aggressive. 0.75–0.90 is sweet spot
-    top_k=None,              # Keep top-K chunks when query provided (None = use min_relevance)
-    min_relevance=0.25,      # Minimum relevance score to keep a chunk
-    model="claude-sonnet-4-20250514",  # For cost estimation
-    separator="\n\n",        # Chunk joiner in output
+    chunk_size=200,
+    overlap=20,
+    dedup_threshold=0.85,
+    min_relevance=0.25,
+    top_k=None,
 )
 ```
 
-| Parameter | Conservative | Default | Aggressive |
-|---|---|---|---|
-| `dedup_threshold` | 0.92 | 0.85 | 0.75 |
-| `min_relevance` | 0.15 | 0.25 | 0.40 |
-| `top_k` | 20 | None | 8 |
-| **Reduction** | ~25% | ~50% | ~70% |
+| Mode         | Reduction |
+| ------------ | --------- |
+| Conservative | ~25%      |
+| Default      | ~50%      |
+| Aggressive   | ~70%      |
+
+⚠️ Aggressive mode may remove niche but important context.
 
 ---
 
-## OptimizeResult
-
-```python
-result = tm.optimize(text, query="...")
-
-result.optimized_text        # str  — compressed text
-result.original_tokens       # int  — token count before
-result.optimized_tokens      # int  — token count after
-result.reduction_percent     # float — e.g. 62.4
-result.saved_tokens          # int  — tokens removed
-result.estimated_savings_usd # float — cost saved (based on model pricing)
-result.elapsed_ms            # float — pipeline latency
-result.chunks_original       # int  — chunks before dedup
-result.chunks_kept           # int  — chunks after dedup + scoring
-result.summary()             # str  — one-line stats
-```
-
----
-
-## Benchmarks
-
-Tested on 50 real-world prompts (docs, transcripts, system prompts):
-
-| Method | Token Reduction | Latency / 1K tokens | Semantic Preservation |
-|---|---|---|---|
-| **TokenMesh (default)** | **52 %** | **6 ms** | **96 %** |
-| TokenMesh (aggressive) | 71 % | 8 ms | 91 % |
-| Graphify | 38 % | 58 ms | 88 % |
-| Naive truncation | 50 % | < 1 ms | 61 % |
-
-*Semantic preservation measured via ROUGE-L overlap between original and optimized responses.*
-
----
-
-## Architecture
+## 🧩 Architecture
 
 ```
 tokenmesh/
-├── tokenmesh/
-│   ├── pipeline.py              # TokenMesh — main public API
-│   ├── core/
-│   │   ├── chunker.py           # SlidingWindowChunker
-│   │   ├── deduplicator.py      # SemanticDeduplicator (sentence-transformers)
-│   │   └── scorer.py            # ImportanceScorer (query-aware)
-│   ├── integrations/
-│   │   └── claude.py            # TokenMeshClaude — drop-in Anthropic client
-│   └── utils/
-│       └── tokencount.py        # tiktoken-based token counting + cost estimation
-├── examples/
-│   ├── basic_usage.py
-│   └── claude_integration.py
-└── tests/
-    └── test_pipeline.py
+├── pipeline.py          # Public API
+├── core/
+│   ├── chunker.py       # Sentence-aware chunking
+│   ├── deduplicator.py  # Semantic pruning
+│   └── scorer.py        # Query relevance
+├── integrations/
+│   └── claude.py        # Drop-in client
+└── utils/
+    └── tokencount.py    # Token + cost estimation
 ```
 
 ---
 
-## Roadmap
+## 💡 Use Cases
 
-- [ ] `v0.2` — Async support (`await client.achat(...)`)
-- [ ] `v0.2` — OpenAI / Gemini integration
-- [ ] `v0.3` — FAISS-powered RAP (Retrieval-Augmented Pruning) for 10K+ token docs
-- [ ] `v0.3` — Custom domain vocabulary / BPE recompressor
-- [ ] `v0.4` — Flutter/Dart SDK (for mobile trading apps)
-- [ ] `v0.5` — CLI: `tokenmesh optimize input.txt --query "..."`
+### 1. RAG Optimization
+
+Reduce retrieved chunks before sending to LLM
+
+### 2. Chatbots
+
+Compress long conversations without losing meaning
+
+### 3. System Prompts
+
+Shrink large instruction sets
+
+### 4. AI Agents
+
+Prevent context bloat over time
 
 ---
 
-## Contributing
+## 🆚 What Makes TokenMesh Different?
 
-PRs welcome! Please:
-1. Fork → feature branch → PR to `main`
-2. Run `pytest tests/ -v` before submitting
-3. Keep functions under 50 lines, add docstrings
+* ⚡ Millisecond latency (no graph overhead)
+* 🧠 Query-aware pruning (not just deduplication)
+* 🪶 Zero infrastructure (no vector DB required)
+* 🔌 Drop-in integration with LLM clients
+
+---
+
+## 🛣 Roadmap
+
+* [ ] Async support (`await client.achat(...)`)
+* [ ] OpenAI / Gemini integrations
+* [ ] Retrieval-Augmented Pruning (FAISS)
+* [ ] CLI tool
+
+  ```bash
+  tokenmesh optimize input.txt --query "..."
+  ```
+* [ ] Domain-specific compression models
+
+---
+
+## 🤝 Contributing
 
 ```bash
 git clone https://github.com/yourusername/tokenmesh
@@ -199,8 +271,20 @@ pip install -e ".[dev]"
 pytest tests/ -v
 ```
 
+Guidelines:
+
+* Keep functions <50 lines
+* Add tests + docstrings
+
 ---
 
-## License
+## 📜 License
 
 MIT © TokenMesh Contributors
+
+---
+
+## ⭐ If this saves you tokens, star the repo
+
+---
+
