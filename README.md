@@ -265,7 +265,7 @@ Prevent context bloat over time
 ## 🤝 Contributing
 
 ```bash
-git clone https://github.com/yourusername/tokenmesh
+git clone https://github.com/AnkitSingh36/tokenmesh
 cd tokenmesh
 pip install -e ".[dev]"
 pytest tests/ -v
