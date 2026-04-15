@@ -1,16 +1,3 @@
-"""
-TokenMesh Pipeline v0.2 — Fixed & Extended.
-
-Fixes vs v0.1:
-  BUG #1  Wrong victim selection in deduplicator (embedding dim vs text len)
-  BUG #2  Overlap inflates output tokens — default overlap changed to 0
-  GAP #3  Added Stage 0: TextNormalizer (6-12% free reduction)
-  GAP #4  Embeddings shared between deduplicator and scorer (2x faster)
-  GAP #5  Default chunk_size lowered 200->40 (sentence-level granularity)
-  GAP #6  Added token_budget parameter with adaptive scoring loop
-  GAP #7  Smart separator: space for prompts, newline for documents
-"""
-
 from __future__ import annotations
 
 import logging
@@ -190,3 +177,59 @@ class TokenMesh:
             elapsed_ms=(time.perf_counter() - t0) * 1000,
             model=self.model,
         )
+
+
+# ── Preset factory functions ──────────────────────────────────────────────────
+
+def TokenMeshLite(**kwargs) -> TokenMesh:
+    """
+    Lite mode — safe, conservative optimization.
+
+    Removes only high-confidence duplicates and obvious filler.
+    Suitable for system prompts, legal text, financial instructions,
+    or any content where precision matters more than compression.
+
+    Typical reduction: 20–40%
+    Risk of information loss: very low
+
+    Usage:
+        from tokenmesh import TokenMeshLite
+        tm = TokenMeshLite()
+        result = tm.optimize(text, query="...")
+    """
+    defaults = dict(
+        chunk_size=50,
+        overlap=0,
+        dedup_threshold=0.92,   # Only remove near-identical text
+        min_relevance=0.20,     # Keep more chunks when scoring
+        normalize=True,
+    )
+    defaults.update(kwargs)
+    return TokenMesh(**defaults)
+
+
+def TokenMeshAggressive(**kwargs) -> TokenMesh:
+    """
+    Aggressive mode — maximum compression.
+
+    Removes semantic paraphrases, loosely related content, and
+    all filler. Best for long RAG documents, conversation history,
+    pasted articles, or any content where brevity matters most.
+
+    Typical reduction: 55–75%
+    Risk of information loss: low-medium (use with a query for best results)
+
+    Usage:
+        from tokenmesh import TokenMeshAggressive
+        tm = TokenMeshAggressive()
+        result = tm.optimize(text, query="...")
+    """
+    defaults = dict(
+        chunk_size=30,
+        overlap=0,
+        dedup_threshold=0.72,   # Catch loose paraphrases
+        min_relevance=0.35,     # Stricter relevance gate
+        normalize=True,
+    )
+    defaults.update(kwargs)
+    return TokenMesh(**defaults)

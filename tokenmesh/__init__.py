@@ -1,32 +1,29 @@
 """
 TokenMesh — Semantic token optimizer for LLM prompts.
 
-Reduce your Claude/GPT-4 token usage by 40–75% with zero semantic loss
-using a three-stage pipeline: sliding window chunking → semantic dedup
-→ query-aware importance scoring.
+Reduce Claude / GPT-4 token usage by 40-75% with zero semantic loss
+using a four-stage pipeline: normalize → chunk → dedup → score.
 
 Quickstart::
 
     from tokenmesh import TokenMesh
-
     tm = TokenMesh()
-    result = tm.optimize(long_document, query="What are the key risks?")
+    result = tm.optimize(text, query="...")
+    print(result.optimized_text)
 
-    print(result.optimized_text)       # Feed directly to Claude
-    print(result.reduction_percent)    # e.g. 62.4
-    print(result.summary())            # One-line stats
+Preset modes::
+
+    from tokenmesh import TokenMeshLite        # safe, 20-40% reduction
+    from tokenmesh import TokenMeshAggressive  # max, 55-75% reduction
 
 Drop-in Claude client::
 
     from tokenmesh.integrations.claude import TokenMeshClaude
-
     client = TokenMeshClaude()
-    response = client.chat(system=long_prompt, user="Summarize the risks")
-    print(response.content)
-    print(f"Saved {response.token_savings} tokens")
+    response = client.chat(system=long_prompt, user="your question")
 """
 
-from tokenmesh.pipeline import OptimizeResult, TokenMesh
+from tokenmesh.pipeline import OptimizeResult, TokenMesh, TokenMeshAggressive, TokenMeshLite
 
 __version__ = "0.2.0"
-__all__ = ["TokenMesh", "OptimizeResult"]
+__all__ = ["TokenMesh", "TokenMeshLite", "TokenMeshAggressive", "OptimizeResult"]

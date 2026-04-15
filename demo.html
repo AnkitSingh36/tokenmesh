@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TokenMesh Live Demo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ink:#0f0f0e;--ink2:#3a3a36;--ink3:#7a7a72;
+  --paper:#faf9f6;--cream:#f2f0ea;--rule:#e0ddd5;
+  --green:#1a5c3a;--green-bg:#e8f4ee;
+  --red:#a32d2d;--red-bg:#fdf0f0;
+  --blue:#1c4f8a;--blue-bg:#eaf1fb;
+  --amber:#8a5c00;--amber-bg:#fdf6e3;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.6;min-height:100vh}
+
+/* ── HEADER ── */
+header{background:var(--ink);color:#fff;padding:28px 32px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo{font-family:var(--mono);font-size:20px;font-weight:500;letter-spacing:-.01em}
+.logo span{opacity:.45}
+.tagline{font-size:13px;color:rgba(255,255,255,.5);margin-top:2px}
+.gh-link{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);padding:7px 14px;border-radius:6px;text-decoration:none;border:1px solid rgba(255,255,255,.15);transition:all .15s}
+.gh-link:hover{background:rgba(255,255,255,.18)}
+
+/* ── LAYOUT ── */
+.app{max-width:1100px;margin:0 auto;padding:28px 24px 60px}
+
+/* ── MODE SELECTOR ── */
+.mode-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.mode-label{font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-right:4px}
+.mode-btn{font-family:var(--mono);font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.mode-btn:hover{border-color:var(--ink3)}
+.mode-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mode-btn.active.lite{background:#1a5c3a;border-color:#1a5c3a}
+.mode-btn.active.aggr{background:#9b2c2c;border-color:#9b2c2c}
+
+/* ── PANELS ── */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.panels{grid-template-columns:1fr}}
+
+.panel{display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.panel-head{padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.token-badge{font-family:var(--mono);font-size:12px;background:var(--paper);border:1px solid var(--rule);padding:3px 10px;border-radius:20px;color:var(--ink2);transition:all .3s}
+.token-badge.high{background:var(--red-bg);border-color:#f7c1c1;color:var(--red)}
+.token-badge.low{background:var(--green-bg);border-color:#9fe1cb;color:var(--green)}
+
+textarea{flex:1;border:none;outline:none;resize:none;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--ink);background:var(--paper);min-height:260px}
+textarea::placeholder{color:var(--ink3)}
+textarea:focus{background:#fff}
+
+.output-area{flex:1;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--ink2);background:var(--paper);min-height:260px;white-space:pre-wrap;word-break:break-word;overflow-y:auto;position:relative}
+.placeholder-msg{color:var(--ink3);font-style:italic}
+
+/* ── STATS BAR ── */
+.stats-bar{margin:16px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.stat-card{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
+.stat-val{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--ink);line-height:1;display:block;margin-bottom:4px}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-lbl{font-size:11px;color:var(--ink3);line-height:1.3}
+
+/* ── PROGRESS BAR COMPARISON ── */
+.bar-section{margin:20px 0 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+.bar-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-row:last-child{margin-bottom:0}
+.bar-name{font-family:var(--mono);font-size:11px;color:var(--ink2);width:72px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;background:var(--cream);border-radius:3px;height:18px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .5s cubic-bezier(.4,0,.2,1);min-width:24px}
+.bar-fill span{font-family:var(--mono);font-size:10px;color:#fff;white-space:nowrap}
+.bar-orig{background:#9b9590}
+.bar-optim{background:var(--green)}
+
+/* ── DIFF HIGHLIGHTS ── */
+.removed{background:#ffd7d7;color:#7a1a1a;border-radius:2px;padding:0 1px;text-decoration:line-through;opacity:.7}
+.kept{background:transparent;color:var(--ink2)}
+
+/* ── CONTROLS ── */
+.controls{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.run-btn{font-family:var(--mono);font-size:13px;font-weight:500;padding:9px 22px;border-radius:7px;border:none;background:var(--ink);color:#fff;cursor:pointer;transition:all .15s;white-space:nowrap}
+.run-btn:hover{background:#2a2a28;transform:translateY(-1px)}
+.run-btn:active{transform:translateY(0)}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.sample-btn{font-family:var(--mono);font-size:11px;padding:7px 13px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink3);cursor:pointer;transition:all .15s}
+.sample-btn:hover{border-color:var(--ink3);color:var(--ink2)}
+
+.query-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:200px}
+.query-label{font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap}
+.query-input{font-family:var(--mono);font-size:12px;padding:7px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);outline:none;flex:1}
+.query-input:focus{border-color:var(--ink3);background:#fff}
+
+/* ── DIFF TOGGLE ── */
+.diff-toggle{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--ink3);cursor:pointer;user-select:none}
+.diff-toggle input{cursor:pointer;accent-color:var(--green)}
+
+/* ── NOTICE ── */
+.notice{background:var(--amber-bg);border:1px solid #e2c97a;border-radius:8px;padding:12px 16px;font-size:13px;color:var(--amber);margin-bottom:20px;display:flex;gap:10px;align-items:flex-start}
+.notice strong{color:#6b4400}
+
+/* ── INFO ── */
+.info-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:24px}
+.info-card{background:var(--cream);border:1px solid var(--rule);border-radius:8px;padding:14px 16px}
+.info-card h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.info-card ul{list-style:none;padding:0}
+.info-card li{font-size:12px;color:var(--ink2);padding:2px 0}
+.info-card li::before{content:'→ ';color:var(--ink3)}
+
+/* ── SPINNER ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">🧵 TokenMesh <span>live demo</span></div>
+    <div class="tagline">See exactly how many tokens you save — before sending to Claude</div>
+  </div>
+  <a class="gh-link" href="https://github.com/yourusername/tokenmesh" target="_blank">★ GitHub</a>
+</header>
+
+<div class="app">
+
+  <div class="notice">
+    <span>ℹ️</span>
+    <span><strong>How this works:</strong> Stage 0 (normalizer) and Stage 1 (chunker) run entirely in your browser via JavaScript. Stage 2 semantic dedup uses TF-IDF cosine similarity — a faithful approximation of the neural model used in the real library. Token counts use the standard 1 token ≈ 0.75 words ratio.</span>
+  </div>
+
+  <!-- Mode selector -->
+  <div class="mode-row">
+    <span class="mode-label">Mode</span>
+    <button class="mode-btn active" data-mode="default" onclick="setMode('default',this)">⚙ Default</button>
+    <button class="mode-btn lite" data-mode="lite" onclick="setMode('lite',this)">🟢 Lite  (20–40%)</button>
+    <button class="mode-btn aggr" data-mode="aggressive" onclick="setMode('aggressive',this)">🔴 Aggressive  (55–75%)</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="run-btn" id="runBtn" onclick="runOptimize()">▶ Optimize</button>
+    <button class="sample-btn" onclick="loadSample('trading')">Sample: trading prompt</button>
+    <button class="sample-btn" onclick="loadSample('faq')">Sample: FAQ doc</button>
+    <button class="sample-btn" onclick="loadSample('article')">Sample: long article</button>
+    <div class="query-wrap">
+      <span class="query-label">query (optional):</span>
+      <input class="query-input" id="queryInput" placeholder="e.g. stop loss and risk management rules" />
+    </div>
+    <label class="diff-toggle"><input type="checkbox" id="diffToggle" onchange="renderOutput()"> show diff</label>
+  </div>
+
+  <!-- Panels -->
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Input</span>
+        <span class="token-badge" id="origBadge">0 tokens</span>
+      </div>
+      <textarea id="inputText" placeholder="Paste your system prompt, document, or any text here..." oninput="onInput()"></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">TokenMesh output</span>
+        <span class="token-badge" id="optBadge">— tokens</span>
+      </div>
+      <div class="output-area" id="outputArea"><span class="placeholder-msg">Click ▶ Optimize to see the result here</span></div>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar" id="statsBar" style="display:none">
+    <div class="stat-card"><span class="stat-val" id="sOrig">—</span><span class="stat-lbl">Original tokens</span></div>
+    <div class="stat-card"><span class="stat-val green" id="sOpt">—</span><span class="stat-lbl">Optimized tokens</span></div>
+    <div class="stat-card"><span class="stat-val green" id="sRed">—</span><span class="stat-lbl">Reduction</span></div>
+    <div class="stat-card"><span class="stat-val green" id="sSaved">—</span><span class="stat-lbl">Tokens saved</span></div>
+    <div class="stat-card"><span class="stat-val" id="sCost">—</span><span class="stat-lbl">Saved / call (Sonnet $3/1M)</span></div>
+    <div class="stat-card"><span class="stat-val" id="sMonth">—</span><span class="stat-lbl">Saved / month (500 calls/day)</span></div>
+    <div class="stat-card"><span class="stat-val" id="sTime">—</span><span class="stat-lbl">Pipeline time</span></div>
+  </div>
+
+  <!-- Bar comparison -->
+  <div class="bar-section" id="barSection" style="display:none">
+    <div class="bar-title">Token comparison</div>
+    <div class="bar-row">
+      <span class="bar-name">before</span>
+      <div class="bar-track"><div class="bar-fill bar-orig" id="barOrig" style="width:100%"><span id="barOrigTxt">—</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-name">after</span>
+      <div class="bar-track"><div class="bar-fill bar-optim" id="barOpt" style="width:0%"><span id="barOptTxt">—</span></div></div>
+    </div>
+  </div>
+
+  <!-- Info cards -->
+  <div class="info-row">
+    <div class="info-card">
+      <h4>Stage 0 — Normalizer</h4>
+      <ul>
+        <li>"It is important to note that"</li>
+        <li>"Furthermore, Additionally"</li>
+        <li>"under any circumstances"</li>
+        <li>### Markdown headers</li>
+        <li>**bold**, `code` artifacts</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Stage 1 — Chunker</h4>
+      <ul>
+        <li>Splits at sentence boundaries</li>
+        <li>40-word windows (default)</li>
+        <li>overlap=0 (no inflation)</li>
+        <li>Preserves full sentences</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Stage 2 — Dedup (TF-IDF)</h4>
+      <ul>
+        <li>Cosine similarity matrix</li>
+        <li>Removes near-duplicate chunks</li>
+        <li>Keeps longer (richer) chunk</li>
+        <li>Neural in real library</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Stage 3 — Scorer</h4>
+      <ul>
+        <li>Runs only if query is set</li>
+        <li>Scores chunks vs query</li>
+        <li>Drops irrelevant chunks</li>
+        <li>Query-aware compression</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const MODES = {
+  default:    { dedupThreshold: 0.55, minRelevance: 0.15, chunkSize: 40 },
+  lite:       { dedupThreshold: 0.75, minRelevance: 0.10, chunkSize: 50 },
+  aggressive: { dedupThreshold: 0.40, minRelevance: 0.22, chunkSize: 30 },
+};
+let currentMode = 'default';
+let lastResult  = null;
+
+// ── SAMPLE TEXTS ────────────────────────────────────────────────────────────
+const SAMPLES = {
+  trading: `You are an expert swing trading assistant specializing in NSE and BSE equity markets.
+You are a knowledgeable financial co-pilot helping retail Indian investors trade profitably.
+Your role is to assist with trade analysis, scanner interpretation, and risk management.
+You help Indian retail investors make smarter decisions in NSE and BSE equity markets.
+
+Always apply strict risk management: every trade must have a defined stop loss.
+Never let a losing trade run beyond the defined stop loss level under any circumstances.
+Risk management is non-negotiable — protecting capital is more important than profit.
+Never enter a trade without a pre-defined stop loss and target ratio of at least 1:2.
+Stop losses are mandatory on every single position without any exception whatsoever.
+
+Use technical analysis tools including EMA crossovers, MACD, RSI, and volume analysis.
+Identify demand and supply zones using price action and volume at key price levels.
+EMA 20/50 crossovers combined with RSI confirmation produce high-probability trade signals.
+Technical indicators like MACD and RSI help confirm the direction of the price trend.
+
+When analyzing breakouts, always confirm with volume. A breakout without volume is a fake-out.
+Look for at least 1.5x average volume on the breakout candle to confirm genuine interest.
+Volume confirmation is mandatory before entering any breakout trade in NSE or BSE markets.
+Low-volume breakouts frequently fail and result in false signals that cause unnecessary losses.
+
+Use trailing stop losses once the trade moves 1R in your favor after entry.
+Move your stop loss to breakeven once the trade is up by at least 1x the initial risk.
+Trail the stop loss by 10-EMA on the daily chart once the position is up by 2R profit.
+Protecting profits with trailing stops is as important as the initial stop loss placement.
+Never let a winning trade turn into a losing trade — always trail stops to lock in profits.`,
+
+  faq: `What is a stop loss?
+A stop loss is an order that exits a trade automatically at a pre-set price level.
+A stop-loss order automatically closes your position when price falls to your exit level.
+Using stop losses is how professional traders prevent large losses in any single trade.
+Stop losses protect your capital by exiting automatically when the price moves against you.
+
+What is EMA?
+EMA stands for Exponential Moving Average and gives more weight to recent price data.
+The Exponential Moving Average places higher importance on the most recent prices.
+EMA reacts faster to price changes compared to a Simple Moving Average of the same period.
+Moving averages like EMA help traders identify the direction and momentum of a trend.
+
+What is the Nifty 50?
+The Nifty 50 index tracks the top 50 companies listed on the National Stock Exchange India.
+Nifty 50 is the primary benchmark index for the National Stock Exchange of India.
+The top 50 large-cap companies on NSE are tracked by the Nifty 50 benchmark index.
+It is important to note that Nifty 50 is widely used as a market benchmark by investors.`,
+
+  article: `Technical analysis is the study of past price movements to forecast future price direction.
+Traders and investors use charts, indicators, and patterns to make buy and sell decisions.
+Furthermore, fundamental analysis evaluates a company's intrinsic value through financial statements.
+The price-to-earnings ratio compares current share price to earnings per share for valuation.
+It is important to note that momentum strategies involve buying assets with strong recent performance.
+Additionally, contrarian investing means buying assets that most investors are currently selling.
+
+Swing trading holds positions for several days to capture medium-term price movements in markets.
+Position sizing determines how much capital to allocate to each individual trade you take.
+It should be noted that diversification across sectors and asset classes reduces concentration risk.
+Moreover, backtesting validates a trading strategy by running it against historical price data.
+That being said, risk management remains the single most important factor in long-term trading success.
+In other words, without proper risk controls, even a profitable strategy can lead to account ruin.
+
+As mentioned earlier, stop losses are the primary tool for risk management in trading.
+Please note that every trade should have a defined exit level before the position is opened.
+Needless to say, emotional trading is the enemy of consistent profitability in financial markets.
+To be clear, a trading plan should be created and followed rigorously without deviation.`
+};
+
+// ── TOKENIZER (approximation) ────────────────────────────────────────────────
+function countTokens(text) {
+  if (!text || !text.trim()) return 0;
+  return Math.max(1, Math.round(text.split(/\s+/).filter(Boolean).length * 1.33));
+}
+
+// ── NORMALIZER (JS port of Python normalizer.py) ────────────────────────────
+const FILLERS = [
+  [/\bIt is (?:very |extremely |critically |absolutely )?important (?:to note |to remember )?that\b/gi, ''],
+  [/\bIt should be noted that\b/gi, ''],
+  [/\bPlease note that\b/gi, ''],
+  [/\bNote that\b/gi, ''],
+  [/\bAs (?:previously |earlier |already )?mentioned(?:above|earlier|before|previously)?,?\s*/gi, ''],
+  [/\bAs (?:discussed|noted|stated|explained) (?:above|earlier|before|previously),?\s*/gi, ''],
+  [/\bThat being said,?\s*/gi, ''],
+  [/\bWith that (?:said|in mind),?\s*/gi, ''],
+  [/\bIn other words,?\s*/gi, ''],
+  [/\bTo (?:put it simply|be clear|summarize|recap),?\s*/gi, ''],
+  [/\bNeedless to say,?\s*/gi, ''],
+  [/\bOf course,?\s*/gi, ''],
+  [/\bObviously,?\s*/gi, ''],
+  [/\bClearly,?\s*/gi, ''],
+  [/\bFurthermore,?\s*/gi, ''],
+  [/\bAdditionally,?\s*/gi, ''],
+  [/\bMoreover,?\s*/gi, ''],
+  [/\bIn addition(?:\s+to\s+that)?,?\s*/gi, ''],
+  [/\bAlso,\s+/gi, ''],
+  [/\bunder any circumstances\b/gi, ''],
+  [/\bis non-negotiable\b/gi, ''],
+  [/\bat all times\b/gi, ''],
+  [/\bwithout exception\b/gi, ''],
+  [/\bin all cases\b/gi, ''],
+  [/#{1,6}\s+/g, ''],
+  [/\*{1,3}([^*]+)\*{1,3}/g, '$1'],
+  [/`([^`]+)`/g, '$1'],
+  [/<[^>]+>/g, ''],
+  [/\[([^\]]+)\]\([^)]+\)/g, '$1'],
+  [/\.{2,}/g, '.'],
+  [/!{2,}/g, '!'],
+  [/-{3,}/g, '—'],
+  [/\s{2,}/g, ' '],
+  [/^\s*,\s*/gm, ''],
+];
+
+function normalize(text) {
+  let r = text;
+  for (const [pat, rep] of FILLERS) r = r.replace(pat, rep);
+  r = r.replace(/\n{3,}/g, '\n\n').trim();
+  r = r.replace(/  +/g, ' ').replace(/\s+\./g, '.').trim();
+  return r;
+}
+
+// ── CHUNKER ──────────────────────────────────────────────────────────────────
+function chunk(text, chunkSize) {
+  const sentenceEnd = /(?<!Dr|Mr|Ms|Sr|Jr|vs)\.\s+|[!?]\s+|\n/;
+  const parts = text.split(sentenceEnd).map(s => s.trim()).filter(s => s.length > 8);
+  const chunks = [];
+  let buf = [];
+  for (const sent of parts) {
+    buf.push(...sent.split(/\s+/));
+    if (buf.length >= chunkSize) {
+      chunks.push(buf.slice(0, chunkSize).join(' '));
+      buf = buf.slice(chunkSize);
+    }
+  }
+  if (buf.length >= 1) chunks.push(buf.join(' '));
+  return chunks;
+}
+
+// ── TF-IDF DEDUP ─────────────────────────────────────────────────────────────
+const STOPWORDS = new Set(['a','an','the','is','it','in','on','of','to','and','or',
+  'for','with','are','be','by','at','as','this','that','from','your','you','all',
+  'also','any','can','its','has','have','not','but','more','than','was','will',
+  'our','their','when','which','who','do','so','up','use','per','via','never','always']);
+
+function tokenize(text) {
+  return text.toLowerCase().match(/[a-z0-9]+/g)
+    ?.filter(w => !STOPWORDS.has(w) && w.length > 2) || [];
+}
+
+function buildTfIdf(chunks) {
+  const tokenized = chunks.map(tokenize);
+  const vocab = {};
+  tokenized.forEach(ws => ws.forEach(w => { if (!(w in vocab)) vocab[w] = Object.keys(vocab).length; }));
+  const V = Object.keys(vocab).length;
+  if (V === 0) return chunks.map(() => new Float32Array(1));
+  const N = chunks.length;
+  const tf = chunks.map((_, i) => {
+    const vec = new Float32Array(V);
+    const ws = tokenized[i];
+    if (!ws.length) return vec;
+    const counts = {};
+    ws.forEach(w => counts[w] = (counts[w] || 0) + 1);
+    Object.entries(counts).forEach(([w, c]) => { vec[vocab[w]] = c / ws.length; });
+    return vec;
+  });
+  const df = new Float32Array(V);
+  tf.forEach(vec => { for (let i = 0; i < V; i++) if (vec[i] > 0) df[i]++; });
+  const idf = df.map(d => Math.log((N + 1) / (d + 1)) + 1);
+  return tf.map(vec => {
+    const tfidf = vec.map((v, i) => v * idf[i]);
+    const norm = Math.sqrt(tfidf.reduce((s, v) => s + v * v, 0)) || 1e-9;
+    return tfidf.map(v => v / norm);
+  });
+}
+
+function cosineSim(a, b) {
+  let dot = 0;
+  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
+  return dot;
+}
+
+function dedup(chunks, threshold) {
+  if (chunks.length <= 1) return { kept: chunks, removedIdx: [] };
+  const vecs = buildTfIdf(chunks);
+  const removed = new Set();
+  for (let i = 0; i < chunks.length; i++) {
+    if (removed.has(i)) continue;
+    for (let j = i + 1; j < chunks.length; j++) {
+      if (removed.has(j)) continue;
+      if (cosineSim(vecs[i], vecs[j]) >= threshold) {
+        const victim = chunks[i].length < chunks[j].length ? i : j;
+        removed.add(victim);
+      }
+    }
+  }
+  const removedIdx = [...removed];
+  const kept = chunks.filter((_, i) => !removed.has(i));
+  return { kept, removedIdx };
+}
+
+// ── SCORER ───────────────────────────────────────────────────────────────────
+function scoreChunks(chunks, query, minRelevance) {
+  if (!query.trim()) return chunks;
+  const allTexts = [query, ...chunks];
+  const vecs = buildTfIdf(allTexts);
+  const qvec = vecs[0];
+  const scored = chunks.map((c, i) => ({ c, s: Math.max(0, cosineSim(vecs[i + 1], qvec)) }));
+  return scored.filter(x => x.s >= minRelevance).map(x => x.c);
+}
+
+// ── MAIN PIPELINE ─────────────────────────────────────────────────────────────
+function runOptimize() {
+  const input = document.getElementById('inputText').value;
+  if (!input.trim()) { alert('Paste some text first!'); return; }
+
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Optimizing...';
+
+  setTimeout(() => {
+    const t0 = performance.now();
+    const cfg = MODES[currentMode];
+    const query = document.getElementById('queryInput').value;
+
+    // Pipeline
+    const norm = normalize(input);
+    const chunks = chunk(norm, cfg.chunkSize);
+    const { kept: deduped } = dedup(chunks, cfg.dedupThreshold);
+    const scored = query.trim() ? scoreChunks(deduped, query, cfg.minRelevance) : deduped;
+    const output = scored.join(' ');
+    const elapsed = performance.now() - t0;
+
+    const origTok = countTokens(input);
+    const optTok  = countTokens(output) || 1;
+    const red     = Math.max(0, Math.round((1 - optTok / origTok) * 100));
+    const saved   = Math.max(0, origTok - optTok);
+
+    lastResult = { input, output, origTok, optTok, red, saved, elapsed };
+    renderStats(lastResult);
+    renderOutput();
+
+    btn.disabled = false;
+    btn.innerHTML = '▶ Optimize';
+  }, 10);
+}
+
+function renderStats(r) {
+  document.getElementById('statsBar').style.display = 'grid';
+  document.getElementById('barSection').style.display = 'block';
+
+  document.getElementById('sOrig').textContent  = r.origTok.toLocaleString();
+  document.getElementById('sOpt').textContent   = r.optTok.toLocaleString();
+  document.getElementById('sRed').textContent   = r.red + '%';
+  document.getElementById('sSaved').textContent = r.saved.toLocaleString();
+
+  const costPerCall  = (r.saved / 1e6) * 3.0;
+  const monthlyS     = costPerCall * 500 * 30;
+  document.getElementById('sCost').textContent  = '$' + costPerCall.toFixed(5);
+  document.getElementById('sMonth').textContent = '$' + monthlyS.toFixed(2);
+  document.getElementById('sTime').textContent  = r.elapsed.toFixed(1) + ' ms';
+
+  // Badge colors
+  const ob = document.getElementById('origBadge');
+  ob.textContent = r.origTok + ' tokens';
+  ob.className = 'token-badge high';
+
+  const optb = document.getElementById('optBadge');
+  optb.textContent = r.optTok + ' tokens  (−' + r.red + '%)';
+  optb.className = 'token-badge low';
+
+  // Bars
+  const pct = Math.max(2, 100 - r.red);
+  document.getElementById('barOrig').style.width = '100%';
+  document.getElementById('barOpt').style.width  = pct + '%';
+  document.getElementById('barOrigTxt').textContent = r.origTok.toLocaleString() + ' tk';
+  document.getElementById('barOptTxt').textContent  = r.optTok.toLocaleString() + ' tk';
+}
+
+function renderOutput() {
+  if (!lastResult) return;
+  const area = document.getElementById('outputArea');
+  const showDiff = document.getElementById('diffToggle').checked;
+
+  if (!showDiff) {
+    area.textContent = lastResult.output;
+    return;
+  }
+
+  // Simple word-level diff: words in input but not output
+  const inWords  = lastResult.input.split(/\s+/).filter(Boolean);
+  const outWords = new Set(lastResult.output.split(/\s+/).filter(Boolean));
+  let html = '';
+  inWords.forEach(w => {
+    const clean = w.replace(/[^a-z0-9]/gi, '').toLowerCase();
+    if (clean.length > 3 && !outWords.has(w) && !outWords.has(clean)) {
+      html += `<span class="removed">${escHtml(w)}</span> `;
+    } else {
+      html += `<span class="kept">${escHtml(w)}</span> `;
+    }
+  });
+  area.innerHTML = html;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────────────────────
+function setMode(mode, el) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function loadSample(key) {
+  document.getElementById('inputText').value = SAMPLES[key];
+  onInput();
+  if (key === 'trading') document.getElementById('queryInput').value = 'stop loss and risk rules';
+  if (key === 'faq')     document.getElementById('queryInput').value = 'what is EMA';
+  if (key === 'article') document.getElementById('queryInput').value = 'risk management';
+}
+
+function onInput() {
+  const t = countTokens(document.getElementById('inputText').value);
+  const b = document.getElementById('origBadge');
+  b.textContent = t + ' tokens';
+  b.className = t > 500 ? 'token-badge high' : 'token-badge';
+}
+
+// Load trading sample on start
+window.onload = () => loadSample('trading');
+</script>
+</body>
+</html>
