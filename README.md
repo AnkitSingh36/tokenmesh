@@ -24,7 +24,7 @@ A Python library that removes duplicate, irrelevant, and filler content from LLM
 
 ## 🚀 Try It Live — No Install Needed
 
-**[→ Open Live Demo](https://AnkitSingh36.github.io/tokenmesh/)** — runs entirely in your browser.
+**[→ Open Live Demo](https://AnkitSingh36.github.io/tokenmesh/demo.html)** — runs entirely in your browser.
 
 Or download and open locally (zero setup):
 
