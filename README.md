@@ -2,10 +2,9 @@
 
 **why send 8000 tokens when 3000 do trick**
 
-[![CI](https://github.com/AnkitSingh36/tokenmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/AnkitSingh36/tokenmesh/actions)
-[![PyPI](https://img.shields.io/pypi/v/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
-[![Python](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<p align="center">
+  ⚡ ~6ms / 1K tokens &nbsp; • &nbsp; 💸 Up to 75% cost reduction &nbsp; • &nbsp; 🧠 Minimal semantic loss
+</p>
 
 [Install](#install) · [Live Demo](#-try-it-live--no-install-needed) · [Quick Start](#quick-start) · [Two Modes](#two-modes-lite--aggressive) · [Claude Integration](#claude-integration) · [Benchmarks](#benchmarks) · [How It Works](#how-it-works) · [Contributing](#contributing)
 
@@ -247,7 +246,7 @@ result.summary()                   # str   — one-line report
 
 ---
 
-## Benchmarks
+## 💡 Use Cases
 
 Real production prompts — not cherry-picked FAQ text.
 
@@ -275,7 +274,7 @@ Naive truncation       ███████████████████
 | CPU-only | ✅ | ❌ | ❌ | ✅ |
 | Latency / 1K tokens | **4–8ms** | 40–80ms | 20–40ms | ~2ms |
 
----
+Compress long conversations without losing meaning
 
 ## How It Works
 
@@ -316,7 +315,12 @@ Claude Opus   ($15/1M input tokens)      =  $90/month saved
 
 ---
 
-## Contributing
+## 🛣 Roadmap
+
+* [ ] Async support (`await client.achat(...)`)
+* [ ] OpenAI / Gemini integrations
+* [ ] Retrieval-Augmented Pruning (FAISS)
+* [ ] CLI tool
 
 **All contributions welcome** — from fixing a typo to building a new integration.
 
@@ -417,7 +421,7 @@ Open a Discussion (not an Issue). Describe the problem it solves and whether you
 
 ---
 
-## License
+## 📜 License
 
 MIT — use it, fork it, ship it.
 
