@@ -50,10 +50,11 @@ def test_chunker_empty_input():
 
 
 def test_chunker_short_text():
-    """Short text that fits in one chunk should return one chunk."""
+    """Short text smaller than chunk_size must still be returned (not silently dropped)."""
     chunker = SlidingWindowChunker(chunk_size=200)
     chunks = chunker.split("Hello world. This is a test.")
-    assert len(chunks) >= 1
+    assert len(chunks) == 1, "Short text must flush as one chunk, never be silently dropped"
+    assert "Hello" in chunks[0].text
 
 
 # ── Token count tests ────────────────────────────────────────────────────────
