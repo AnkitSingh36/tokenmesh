@@ -1,3 +1,61 @@
+## v0.2.1 — Meaning-Preservation Fixes
+
+### Bug Fixes
+
+**FIX — `normalizer.py`: hedge phrases stripped mid-sentence** (Critical)
+
+In v0.2.0, patterns like `is non-negotiable`, `under any circumstances`,
+`at all times`, `without exception` were stripped *anywhere* they appeared —
+including inside meaningful instruction sentences:
+
+```
+# Before (broken):
+"Risk management is non-negotiable — protecting capital..."
+→ "Risk management  — protecting capital..."   ← corrupted
+
+"Stop losses are mandatory without exception whatsoever"
+→ "Stop losses are mandatory  whatsoever"       ← corrupted
+```
+
+Fix: all hedge phrase patterns are removed entirely from the rule list.
+Sentence-opener patterns (`Furthermore,`, `Additionally,`, meta-commentary)
+are now anchored with `(?:^|\n\s*)` so they only fire at sentence boundaries.
+
+**FIX — `deduplicator.py`: numeric-protected chunks could be dropped** (High)
+
+Chunks containing specific numeric values — risk-reward ratios (`1:2`),
+volume multipliers (`1.5x`), named moving averages (`10-EMA`, `20-EMA`),
+risk multiples (`1R`, `2R`), and the keyword `breakeven` — could previously
+be chosen as the victim to drop when paired with a similar chunk.
+
+These sentences carry precise, unique rules with no equivalent elsewhere.
+Dropping them causes silent loss of critical instructions.
+
+Fix: a new `_NUMERIC_GUARD` regex identifies protected chunks. In `_greedy_dedup`:
+- Both chunks protected → keep both (skip this pair)
+- One chunk protected → drop the OTHER one, always
+- Neither protected → drop shorter (existing behaviour, unchanged)
+
+```python
+# New victim selection logic in _greedy_dedup:
+if i_protected and j_protected:
+    continue             # keep both
+elif i_protected:
+    victim = j           # always drop j
+elif j_protected:
+    victim = i           # always drop i
+else:
+    victim = shorter_of(i, j)   # existing behaviour
+```
+
+### Migration from v0.2.0
+
+No API changes. Drop-in replacement. If you were relying on hedge phrase
+removal for compression, note those phrases are no longer stripped —
+they were causing meaning corruption on instruction-heavy prompts.
+
+---
+
 # Changelog
 
 ## v0.2.0 — Bug Fixes & Token Savings Improvements

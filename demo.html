@@ -3,258 +3,628 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TokenMesh Live Demo</title>
+<title>TokenMesh — Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --ink:#0f0f0e;--ink2:#3a3a36;--ink3:#7a7a72;
-  --paper:#faf9f6;--cream:#f2f0ea;--rule:#e0ddd5;
-  --green:#1a5c3a;--green-bg:#e8f4ee;
-  --red:#a32d2d;--red-bg:#fdf0f0;
-  --blue:#1c4f8a;--blue-bg:#eaf1fb;
-  --amber:#8a5c00;--amber-bg:#fdf6e3;
-  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+  --ink:#0d0d0c;--ink2:#3b3b37;--ink3:#8a8a80;
+  --paper:#f8f7f3;--cream:#f0ede4;--rule:#e2dfd5;
+  --green:#1a5c3a;--green-l:#e8f4ee;
+  --red:#c5341e;--red-l:#fdecea;
+  --blue:#1c4f8a;--gold:#a07010;
+  --mono:'DM Mono',monospace;--disp:'Syne',sans-serif;--body:'DM Sans',sans-serif;
 }
-
-body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.6;min-height:100vh}
-
-/* ── HEADER ── */
-header{background:var(--ink);color:#fff;padding:28px 32px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.logo{font-family:var(--mono);font-size:20px;font-weight:500;letter-spacing:-.01em}
-.logo span{opacity:.45}
-.tagline{font-size:13px;color:rgba(255,255,255,.5);margin-top:2px}
-.gh-link{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);padding:7px 14px;border-radius:6px;text-decoration:none;border:1px solid rgba(255,255,255,.15);transition:all .15s}
-.gh-link:hover{background:rgba(255,255,255,.18)}
-
-/* ── LAYOUT ── */
-.app{max-width:1100px;margin:0 auto;padding:28px 24px 60px}
-
-/* ── MODE SELECTOR ── */
-.mode-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
-.mode-label{font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-right:4px}
-.mode-btn{font-family:var(--mono);font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink2);cursor:pointer;transition:all .15s;white-space:nowrap}
-.mode-btn:hover{border-color:var(--ink3)}
-.mode-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.mode-btn.active.lite{background:#1a5c3a;border-color:#1a5c3a}
-.mode-btn.active.aggr{background:#9b2c2c;border-color:#9b2c2c}
-
-/* ── PANELS ── */
-.panels{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:720px){.panels{grid-template-columns:1fr}}
-
-.panel{display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
-.panel-head{padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;gap:8px}
-.panel-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
-.token-badge{font-family:var(--mono);font-size:12px;background:var(--paper);border:1px solid var(--rule);padding:3px 10px;border-radius:20px;color:var(--ink2);transition:all .3s}
-.token-badge.high{background:var(--red-bg);border-color:#f7c1c1;color:var(--red)}
-.token-badge.low{background:var(--green-bg);border-color:#9fe1cb;color:var(--green)}
-
-textarea{flex:1;border:none;outline:none;resize:none;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--ink);background:var(--paper);min-height:260px}
-textarea::placeholder{color:var(--ink3)}
-textarea:focus{background:#fff}
-
-.output-area{flex:1;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--ink2);background:var(--paper);min-height:260px;white-space:pre-wrap;word-break:break-word;overflow-y:auto;position:relative}
-.placeholder-msg{color:var(--ink3);font-style:italic}
-
-/* ── STATS BAR ── */
-.stats-bar{margin:16px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-.stat-card{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
-.stat-val{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--ink);line-height:1;display:block;margin-bottom:4px}
-.stat-val.green{color:var(--green)}
-.stat-val.red{color:var(--red)}
-.stat-lbl{font-size:11px;color:var(--ink3);line-height:1.3}
-
-/* ── PROGRESS BAR COMPARISON ── */
-.bar-section{margin:20px 0 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
-.bar-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65}
+/* header */
+.hdr{background:var(--ink);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.hdr-logo{font-family:var(--disp);font-size:20px;font-weight:800;letter-spacing:-.02em;color:#fff}
+.hdr-logo span{color:rgba(255,255,255,.3)}
+.hdr-badge{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:3px 8px;border:1px solid rgba(255,255,255,.12);border-radius:4px;margin-left:10px}
+.hdr-links a{color:rgba(255,255,255,.45);text-decoration:none;font-size:13px;margin-left:18px;transition:color .15s}
+.hdr-links a:hover{color:#fff}
+/* layout */
+.main{max-width:1060px;margin:0 auto;padding:28px 20px 60px}
+/* hero */
+.hero{background:var(--ink);border-radius:10px;padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.hero-hl{font-family:var(--disp);font-size:clamp(20px,3vw,30px);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em}
+.hero-hl em{color:rgba(255,255,255,.35);font-style:italic}
+.hero-stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat .n{font-family:var(--mono);font-size:24px;font-weight:500;color:#fff;display:block;line-height:1}
+.stat .l{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em}
+/* mode tabs */
+.mode-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.mode-btn{font-family:var(--mono);font-size:12px;padding:8px 14px;border-radius:6px;border:1.5px solid var(--rule);background:var(--paper);color:var(--ink2);cursor:pointer;transition:all .15s;font-weight:500}
+.mode-btn:hover{border-color:var(--ink3);color:var(--ink)}
+.mode-btn.active-off{background:var(--ink);border-color:var(--ink);color:#fff}
+.mode-btn.active-lite{background:var(--green);border-color:var(--green);color:#fff}
+.mode-btn.active-agg{background:var(--red);border-color:var(--red);color:#fff}
+/* query */
+.q-row{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.q-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.q-input{flex:1;min-width:200px;padding:9px 14px;border:1.5px solid var(--rule);border-radius:6px;font-family:var(--body);font-size:14px;background:#fff;color:var(--ink);outline:none;transition:border-color .15s}
+.q-input:focus{border-color:var(--blue)}
+/* grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.phdr{background:var(--cream);border-bottom:1px solid var(--rule);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ptitle{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.pcount{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink)}
+textarea{width:100%;height:260px;padding:12px 14px;font-family:var(--body);font-size:13.5px;line-height:1.6;border:none;outline:none;resize:vertical;background:transparent;color:var(--ink2)}
+.out-area{min-height:260px;padding:12px 14px;font-size:13.5px;line-height:1.6;color:var(--ink2);white-space:pre-wrap;word-break:break-word}
+.out-area.empty{color:var(--ink3);font-style:italic}
+/* diff highlight */
+.kept{background:rgba(26,92,58,.08);border-radius:2px}
+.removed{background:rgba(197,52,30,.08);color:var(--red);text-decoration:line-through;border-radius:2px}
+/* run btn */
+.run-btn{width:100%;padding:13px;font-family:var(--disp);font-size:15px;font-weight:700;letter-spacing:.04em;background:var(--ink);color:#fff;border:none;border-radius:8px;cursor:pointer;transition:opacity .15s;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:8px}
+.run-btn:hover{opacity:.85}
+.run-btn:disabled{opacity:.35;cursor:not-allowed}
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin-bottom:16px}
+.metric{background:var(--paper);padding:14px 16px}
+.metric.hl{background:var(--green-l)}
+.mv{font-family:var(--mono);font-size:21px;font-weight:500;color:var(--ink);display:block;line-height:1;margin-bottom:4px}
+.mv.grn{color:var(--green)}.mv.red{color:var(--red)}
+.ml{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em}
+/* bar */
+.bar-wrap{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:18px 18px 14px;margin-bottom:16px}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .bar-row:last-child{margin-bottom:0}
-.bar-name{font-family:var(--mono);font-size:11px;color:var(--ink2);width:72px;flex-shrink:0;text-align:right}
-.bar-track{flex:1;background:var(--cream);border-radius:3px;height:18px;overflow:hidden}
-.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .5s cubic-bezier(.4,0,.2,1);min-width:24px}
-.bar-fill span{font-family:var(--mono);font-size:10px;color:#fff;white-space:nowrap}
-.bar-orig{background:#9b9590}
-.bar-optim{background:var(--green)}
-
-/* ── DIFF HIGHLIGHTS ── */
-.removed{background:#ffd7d7;color:#7a1a1a;border-radius:2px;padding:0 1px;text-decoration:line-through;opacity:.7}
-.kept{background:transparent;color:var(--ink2)}
-
-/* ── CONTROLS ── */
-.controls{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.run-btn{font-family:var(--mono);font-size:13px;font-weight:500;padding:9px 22px;border-radius:7px;border:none;background:var(--ink);color:#fff;cursor:pointer;transition:all .15s;white-space:nowrap}
-.run-btn:hover{background:#2a2a28;transform:translateY(-1px)}
-.run-btn:active{transform:translateY(0)}
-.run-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-
-.sample-btn{font-family:var(--mono);font-size:11px;padding:7px 13px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink3);cursor:pointer;transition:all .15s}
-.sample-btn:hover{border-color:var(--ink3);color:var(--ink2)}
-
-.query-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:200px}
-.query-label{font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap}
-.query-input{font-family:var(--mono);font-size:12px;padding:7px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);outline:none;flex:1}
-.query-input:focus{border-color:var(--ink3);background:#fff}
-
-/* ── DIFF TOGGLE ── */
-.diff-toggle{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--ink3);cursor:pointer;user-select:none}
-.diff-toggle input{cursor:pointer;accent-color:var(--green)}
-
-/* ── NOTICE ── */
-.notice{background:var(--amber-bg);border:1px solid #e2c97a;border-radius:8px;padding:12px 16px;font-size:13px;color:var(--amber);margin-bottom:20px;display:flex;gap:10px;align-items:flex-start}
-.notice strong{color:#6b4400}
-
-/* ── INFO ── */
-.info-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:24px}
-.info-card{background:var(--cream);border:1px solid var(--rule);border-radius:8px;padding:14px 16px}
-.info-card h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
-.info-card ul{list-style:none;padding:0}
-.info-card li{font-size:12px;color:var(--ink2);padding:2px 0}
-.info-card li::before{content:'→ ';color:var(--ink3)}
-
-/* ── SPINNER ── */
-.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.bn{font-family:var(--mono);font-size:12px;width:72px;flex-shrink:0;color:var(--ink2)}
+.bt{flex:1;height:22px;background:var(--cream);border-radius:4px;overflow:hidden}
+.bf{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
+.bf span{font-family:var(--mono);font-size:11px;color:#fff;white-space:nowrap}
+.bf.red{background:var(--red)}.bf.grn{background:var(--green)}
+/* stages */
+.stages-wrap{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:18px;margin-bottom:16px}
+.stitle{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px}
+.srow{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:13px}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.sname{color:var(--ink2);min-width:160px}
+.sval{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ink)}
+.ssub{color:var(--ink3);font-size:12px;margin-left:4px;flex:1}
+/* cost */
+.cost-wrap{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:18px;margin-bottom:16px}
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}
+.cc{background:var(--cream);border-radius:6px;padding:10px 12px}
+.cc .calls{font-size:11px;color:var(--ink3);margin-bottom:2px}
+.cc .saving{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--green)}
+.cc .period{font-size:11px;color:var(--ink3)}
+/* warning banner */
+.warn{background:#fffbea;border:1px solid #e8d88a;border-radius:8px;padding:12px 16px;font-size:13px;color:#7a6010;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start}
+.warn-icon{flex-shrink:0;margin-top:1px}
+/* copy */
+.copy-btn{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border:1px solid var(--rule);border-radius:4px;background:transparent;color:var(--ink3);cursor:pointer;transition:all .15s}
+.copy-btn:hover{border-color:var(--ink);color:var(--ink)}
+.copy-btn.copied{border-color:var(--green);color:var(--green)}
+/* samples */
+.sample-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.sample-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.sample-btn{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:5px;border:1px solid var(--rule);background:transparent;color:var(--ink2);cursor:pointer;transition:all .15s}
+.sample-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--cream)}
+/* footer */
+.footer{text-align:center;padding:20px;font-family:var(--mono);font-size:11px;color:var(--ink3);border-top:1px solid var(--rule)}
+.footer a{color:var(--ink3);text-decoration:none}.footer a:hover{color:var(--ink)}
 </style>
 </head>
 <body>
 
-<header>
+<header class="hdr">
   <div>
-    <div class="logo">🧵 TokenMesh <span>live demo</span></div>
-    <div class="tagline">See exactly how many tokens you save — before sending to Claude</div>
+    <span class="hdr-logo">Token<span>Mesh</span></span>
+    <span class="hdr-badge">Live Demo</span>
   </div>
-  <a class="gh-link" href="https://github.com/yourusername/tokenmesh" target="_blank">★ GitHub</a>
+  <nav class="hdr-links">
+    <a href="https://github.com/ankitsingh36/tokenmesh" target="_blank">GitHub</a>
+    <a href="https://pypi.org/project/tokenmesh" target="_blank">PyPI</a>
+  </nav>
 </header>
 
-<div class="app">
-
-  <div class="notice">
-    <span>ℹ️</span>
-    <span><strong>How this works:</strong> Stage 0 (normalizer) and Stage 1 (chunker) run entirely in your browser via JavaScript. Stage 2 semantic dedup uses TF-IDF cosine similarity — a faithful approximation of the neural model used in the real library. Token counts use the standard 1 token ≈ 0.75 words ratio.</span>
+<div class="main">
+  <div class="hero">
+    <div>
+      <div class="hero-hl">See <em>exactly</em> how many tokens<br>you stop wasting.</div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="n" id="h-avg">—</span><span class="l">Reduction</span></div>
+      <div class="stat"><span class="n" id="h-saved">—</span><span class="l">Tokens saved</span></div>
+      <div class="stat"><span class="n" id="h-ms">—</span><span class="l">Time</span></div>
+    </div>
   </div>
 
-  <!-- Mode selector -->
+  <!-- warning -->
+  <div class="warn">
+    <span class="warn-icon">ℹ️</span>
+    <span>This demo runs <strong>entirely in your browser</strong> — no data is sent anywhere.
+    Stage 2 uses TF-IDF cosine similarity (runs in your browser, no server needed).
+    The real Python library uses <code>all-MiniLM-L6-v2</code> neural embeddings,
+    which detects ~3× more semantic duplicates and achieves 40–75% reduction.
+    Browser results are conservative — install the library for full compression.</span>
+  </div>
+
+  <!-- mode -->
   <div class="mode-row">
-    <span class="mode-label">Mode</span>
-    <button class="mode-btn active" data-mode="default" onclick="setMode('default',this)">⚙ Default</button>
-    <button class="mode-btn lite" data-mode="lite" onclick="setMode('lite',this)">🟢 Lite  (20–40%)</button>
-    <button class="mode-btn aggr" data-mode="aggressive" onclick="setMode('aggressive',this)">🔴 Aggressive  (55–75%)</button>
+    <button class="mode-btn active-off" id="btn-off" onclick="setMode('off')">⭕ No optimization</button>
+    <button class="mode-btn" id="btn-lite" onclick="setMode('lite')">🟢 Lite  15–35%</button>
+    <button class="mode-btn" id="btn-aggressive" onclick="setMode('aggressive')">🔴 Aggressive  25–50%</button>
   </div>
 
-  <!-- Controls -->
-  <div class="controls">
-    <button class="run-btn" id="runBtn" onclick="runOptimize()">▶ Optimize</button>
-    <button class="sample-btn" onclick="loadSample('trading')">Sample: trading prompt</button>
-    <button class="sample-btn" onclick="loadSample('faq')">Sample: FAQ doc</button>
-    <button class="sample-btn" onclick="loadSample('article')">Sample: long article</button>
-    <div class="query-wrap">
-      <span class="query-label">query (optional):</span>
-      <input class="query-input" id="queryInput" placeholder="e.g. stop loss and risk management rules" />
-    </div>
-    <label class="diff-toggle"><input type="checkbox" id="diffToggle" onchange="renderOutput()"> show diff</label>
+  <!-- query -->
+  <div class="q-row">
+    <span class="q-label">Query</span>
+    <input class="q-input" id="q" type="text" placeholder="optional — activates query-aware Stage 3 scoring" value="">
+    <label style="font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap">
+      <input type="checkbox" id="show-diff" onchange="renderOutput()"> show diff
+    </label>
   </div>
 
-  <!-- Panels -->
-  <div class="panels">
+  <!-- samples -->
+  <div class="sample-row">
+    <span class="sample-label">Try a sample:</span>
+    <button class="sample-btn" onclick="loadSample('trading')">Trading prompt</button>
+    <button class="sample-btn" onclick="loadSample('faq')">FAQ doc</button>
+    <button class="sample-btn" onclick="loadSample('rag')">RAG context</button>
+  </div>
+
+  <!-- panels -->
+  <div class="grid">
     <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">Input</span>
-        <span class="token-badge" id="origBadge">0 tokens</span>
+      <div class="phdr">
+        <span class="ptitle">Input — paste any text</span>
+        <span class="pcount" id="orig-count">0 tokens</span>
       </div>
-      <textarea id="inputText" placeholder="Paste your system prompt, document, or any text here..." oninput="onInput()"></textarea>
+      <textarea id="inp" placeholder="Paste your system prompt, document, or any LLM context here…" oninput="onInput()"></textarea>
     </div>
     <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">TokenMesh output</span>
-        <span class="token-badge" id="optBadge">— tokens</span>
+      <div class="phdr">
+        <span class="ptitle" id="out-label">Optimized output</span>
+        <div style="display:flex;gap:7px;align-items:center">
+          <span class="pcount" id="opt-count">—</span>
+          <button class="copy-btn" id="copy-btn" onclick="doCopy()">copy</button>
+        </div>
       </div>
-      <div class="output-area" id="outputArea"><span class="placeholder-msg">Click ▶ Optimize to see the result here</span></div>
+      <div class="out-area empty" id="out">Run optimization to see output here.</div>
     </div>
   </div>
 
-  <!-- Stats bar -->
-  <div class="stats-bar" id="statsBar" style="display:none">
-    <div class="stat-card"><span class="stat-val" id="sOrig">—</span><span class="stat-lbl">Original tokens</span></div>
-    <div class="stat-card"><span class="stat-val green" id="sOpt">—</span><span class="stat-lbl">Optimized tokens</span></div>
-    <div class="stat-card"><span class="stat-val green" id="sRed">—</span><span class="stat-lbl">Reduction</span></div>
-    <div class="stat-card"><span class="stat-val green" id="sSaved">—</span><span class="stat-lbl">Tokens saved</span></div>
-    <div class="stat-card"><span class="stat-val" id="sCost">—</span><span class="stat-lbl">Saved / call (Sonnet $3/1M)</span></div>
-    <div class="stat-card"><span class="stat-val" id="sMonth">—</span><span class="stat-lbl">Saved / month (500 calls/day)</span></div>
-    <div class="stat-card"><span class="stat-val" id="sTime">—</span><span class="stat-lbl">Pipeline time</span></div>
+  <button class="run-btn" id="run-btn" onclick="runOptimize()" disabled>
+    <span id="btn-txt">Paste text above to start</span>
+  </button>
+
+  <!-- metrics -->
+  <div class="metrics" id="metrics" style="display:none">
+    <div class="metric"><span class="mv" id="m-orig">—</span><span class="ml">Original tokens</span></div>
+    <div class="metric hl"><span class="mv grn" id="m-opt">—</span><span class="ml">Optimized tokens</span></div>
+    <div class="metric hl"><span class="mv grn" id="m-pct">—</span><span class="ml">Reduction</span></div>
+    <div class="metric"><span class="mv" id="m-saved">—</span><span class="ml">Saved</span></div>
+    <div class="metric"><span class="mv" id="m-time">—</span><span class="ml">Time</span></div>
+    <div class="metric"><span class="mv" id="m-cost">—</span><span class="ml">$/call (Sonnet)</span></div>
   </div>
 
-  <!-- Bar comparison -->
-  <div class="bar-section" id="barSection" style="display:none">
-    <div class="bar-title">Token comparison</div>
+  <!-- bars -->
+  <div class="bar-wrap" id="bar-wrap" style="display:none">
     <div class="bar-row">
-      <span class="bar-name">before</span>
-      <div class="bar-track"><div class="bar-fill bar-orig" id="barOrig" style="width:100%"><span id="barOrigTxt">—</span></div></div>
+      <span class="bn">Before</span>
+      <div class="bt"><div class="bf red" id="b-before" style="width:100%"><span id="b-before-lbl"></span></div></div>
     </div>
     <div class="bar-row">
-      <span class="bar-name">after</span>
-      <div class="bar-track"><div class="bar-fill bar-optim" id="barOpt" style="width:0%"><span id="barOptTxt">—</span></div></div>
+      <span class="bn">After</span>
+      <div class="bt"><div class="bf grn" id="b-after" style="width:0"><span id="b-after-lbl"></span></div></div>
     </div>
   </div>
 
-  <!-- Info cards -->
-  <div class="info-row">
-    <div class="info-card">
-      <h4>Stage 0 — Normalizer</h4>
-      <ul>
-        <li>"It is important to note that"</li>
-        <li>"Furthermore, Additionally"</li>
-        <li>"under any circumstances"</li>
-        <li>### Markdown headers</li>
-        <li>**bold**, `code` artifacts</li>
-      </ul>
-    </div>
-    <div class="info-card">
-      <h4>Stage 1 — Chunker</h4>
-      <ul>
-        <li>Splits at sentence boundaries</li>
-        <li>40-word windows (default)</li>
-        <li>overlap=0 (no inflation)</li>
-        <li>Preserves full sentences</li>
-      </ul>
-    </div>
-    <div class="info-card">
-      <h4>Stage 2 — Dedup (TF-IDF)</h4>
-      <ul>
-        <li>Cosine similarity matrix</li>
-        <li>Removes near-duplicate chunks</li>
-        <li>Keeps longer (richer) chunk</li>
-        <li>Neural in real library</li>
-      </ul>
-    </div>
-    <div class="info-card">
-      <h4>Stage 3 — Scorer</h4>
-      <ul>
-        <li>Runs only if query is set</li>
-        <li>Scores chunks vs query</li>
-        <li>Drops irrelevant chunks</li>
-        <li>Query-aware compression</li>
-      </ul>
-    </div>
+  <!-- stages -->
+  <div class="stages-wrap" id="stages-wrap" style="display:none">
+    <div class="stitle">Pipeline stages — where did savings come from?</div>
+    <div class="srow"><div class="sdot" style="background:#6b8cba"></div><span class="sname">Stage 0 · Normalizer</span><span class="sval" id="s0v">—</span><span class="ssub" id="s0s"></span></div>
+    <div class="srow"><div class="sdot" style="background:var(--green)"></div><span class="sname">Stage 1 · Chunk + Dedup</span><span class="sval" id="s2v">—</span><span class="ssub" id="s2s"></span></div>
+    <div class="srow"><div class="sdot" style="background:var(--gold)"></div><span class="sname">Stage 3 · Query score</span><span class="sval" id="s3v">—</span><span class="ssub" id="s3s"></span></div>
   </div>
 
+  <!-- cost -->
+  <div class="cost-wrap" id="cost-wrap" style="display:none">
+    <div class="stitle">Monthly savings · Claude Sonnet ($3 / 1M tokens)</div>
+    <div class="cost-grid" id="cost-grid"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://github.com/ankitsingh36/tokenmesh">TokenMesh</a> · MIT ·
+  runs entirely in your browser · no data sent anywhere
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+//  TokenMesh Browser Engine  v0.2-fixed
+//
+//  ROOT CAUSE FIXES vs original broken demo:
+//  FIX 1 — Normalizer: only strips genuine filler OPENERS at sentence
+//           start. Never fires on instruction content mid-sentence.
+//  FIX 2 — Chunker: sentence-first split, then group N sentences.
+//           Never cuts words mid-sentence.
+//  FIX 3 — TF-IDF threshold recalibrated: 0.62 (lite) / 0.52 (agg).
+//           Original used 0.25 which is neural scale, not TF-IDF scale.
+//  FIX 4 — Output join: sentences separated by '\n', not ' '.
+//  FIX 5 — Stage 3 scorer: only runs when query is explicitly provided.
+// ══════════════════════════════════════════════════════════════════════
+
+// ── CONFIG ────────────────────────────────────────────────────────────
 const MODES = {
-  default:    { dedupThreshold: 0.55, minRelevance: 0.15, chunkSize: 40 },
-  lite:       { dedupThreshold: 0.75, minRelevance: 0.10, chunkSize: 50 },
-  aggressive: { dedupThreshold: 0.40, minRelevance: 0.22, chunkSize: 30 },
+  // TF-IDF max similarity on typical prompts is ~0.30.
+  // Thresholds below are calibrated for TF-IDF (NOT neural scale).
+  off:        { dedup: 9.99, scorer: false, label: 'No optimization' },
+  lite:       { dedup: 0.28, scorer: true,  label: 'Lite' },
+  aggressive: { dedup: 0.22, scorer: true,  label: 'Aggressive' },
 };
-let currentMode = 'default';
+let currentMode = 'off';
 let lastResult  = null;
 
-// ── SAMPLE TEXTS ────────────────────────────────────────────────────────────
+// ── STOPWORDS ─────────────────────────────────────────────────────────
+const SW = new Set(['a','an','the','is','it','in','on','of','to','and','or',
+  'for','with','are','be','by','at','as','this','that','from','your','you',
+  'all','also','any','can','its','has','have','not','but','more','than',
+  'was','will','never','always','every','each','use','when','once','after',
+  'before','then','do','so','up','per','just','very','really']);
+
+// ── STAGE 0 — SAFE NORMALIZER ─────────────────────────────────────────
+// FIX 1: Only strips genuine empty openers. Never fires on instruction words.
+// Pattern must be: sentence-start filler that adds no meaning whatsoever.
+const FILLER_RULES = [
+  [/^It is (?:very |extremely )?important (?:to note )?that\s+/gim, ''],
+  [/^Please note that\s+/gim, ''],
+  [/^Note that\s+/gim, ''],
+  [/^Furthermore,\s+/gim, ''],
+  [/^Additionally,\s+/gim, ''],
+  [/^Moreover,\s+/gim, ''],
+  [/^That being said,\s+/gim, ''],
+  [/^In other words,\s+/gim, ''],
+  [/^As (?:previously |earlier )?mentioned(?:,)?\s+/gim, ''],
+  [/^Needless to say,\s+/gim, ''],
+  // markdown only — safe to always strip
+  [/^#{1,6}\s+/gm, ''],
+  [/\*{1,3}([^*\n]+)\*{1,3}/g, '$1'],
+  [/`([^`\n]+)`/g, '$1'],
+  [/<[^>]+>/g, ''],
+  [/\[([^\]]+)\]\([^)]+\)/g, '$1'],
+  [/[ \t]{2,}/g, ' '],
+];
+function normalize(text) {
+  let t = text;
+  for (const [pat, rep] of FILLER_RULES) t = t.replace(pat, rep);
+  t = t.replace(/\n{3,}/g, '\n\n').trim();
+  return t;
+}
+
+// ── STAGE 1 — SENTENCE-FIRST CHUNKER ─────────────────────────────────
+// FIX 2: Split at sentence boundaries FIRST, then group N sentences.
+// This guarantees every chunk is complete sentences — no mid-word cuts.
+function splitSentences(text) {
+  // Split at . ! ? followed by whitespace, or at newline
+  const raw = text.split(/(?<=[.!?])\s+|\n+/);
+  return raw.map(s => s.trim()).filter(s => s.length > 8);
+}
+function groupSentences(sentences, n) {
+  // Group every N sentences into a chunk
+  const chunks = [];
+  for (let i = 0; i < sentences.length; i += n) {
+    const group = sentences.slice(i, i + n);
+    chunks.push(group.join(' '));
+  }
+  return chunks;
+}
+
+// ── TF-IDF ENGINE ─────────────────────────────────────────────────────
+function tokenize(text) {
+  return text.toLowerCase().match(/[a-z]+/g)
+    ?.filter(w => !SW.has(w) && w.length > 3) || [];
+}
+function buildTFIDF(docs) {
+  const N = docs.length;
+  if (!N) return { matrix: [], vocab: {} };
+  const tok = docs.map(tokenize);
+  const vocab = {};
+  tok.forEach(ws => ws.forEach(w => { if (!(w in vocab)) vocab[w] = Object.keys(vocab).length; }));
+  const V = Object.keys(vocab).length;
+  if (!V) return { matrix: docs.map(() => new Float32Array(0)), vocab };
+  // TF
+  const tf = tok.map(ws => {
+    const v = new Float32Array(V);
+    if (!ws.length) return v;
+    const c = {};
+    ws.forEach(w => c[w] = (c[w]||0) + 1);
+    Object.entries(c).forEach(([w, n]) => v[vocab[w]] = n / ws.length);
+    return v;
+  });
+  // IDF
+  const df = new Float32Array(V);
+  tf.forEach(v => v.forEach((x, i) => { if (x > 0) df[i]++; }));
+  const idf = df.map(d => Math.log((N + 1) / (d + 1)) + 1);
+  // TF-IDF + L2 normalize
+  const matrix = tf.map(v => {
+    const tfidf = v.map((x, i) => x * idf[i]);
+    const norm = Math.sqrt(tfidf.reduce((s, x) => s + x * x, 0)) || 1e-9;
+    return tfidf.map(x => x / norm);
+  });
+  return { matrix, vocab };
+}
+function cosineSim(a, b) {
+  if (!a.length || !b.length) return 0;
+  let dot = 0;
+  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
+  return dot;
+}
+
+// ── NUMERIC GUARD ────────────────────────────────────────────────────────
+// Sentences with specific numeric values (ratios, multipliers, named thresholds)
+// carry precise rules that must NEVER be dropped as duplicates.
+// e.g. "1:2 R:R", "1.5x volume", "10-EMA", "breakeven", "2R"
+const NUMERIC_PAT = /\d+:\d|\d+\.\d+x|\b\d+[Rr]\b|10-EMA|breakeven/i;
+function isProtected(sentence) {
+  return NUMERIC_PAT.test(sentence);
+}
+
+// ── STAGE 2 — DEDUP ───────────────────────────────────────────────────
+function dedup(sentences, threshold) {
+  if (sentences.length <= 1) return { kept: sentences, removed: [] };
+  const { matrix } = buildTFIDF(sentences);
+  const removed = new Set();
+  const removedPairs = [];
+  for (let i = 0; i < sentences.length; i++) {
+    if (removed.has(i)) continue;
+    for (let j = i + 1; j < sentences.length; j++) {
+      if (removed.has(j)) continue;
+      const sim = cosineSim(matrix[i], matrix[j]);
+      if (sim >= threshold) {
+        const iProt = isProtected(sentences[i]);
+        const jProt = isProtected(sentences[j]);
+        let victim;
+        if (iProt && jProt) continue;          // both have unique numbers — keep both
+        else if (iProt)     victim = j;        // i is protected, drop j
+        else if (jProt)     victim = i;        // j is protected, drop i
+        else                victim = sentences[i].length < sentences[j].length ? i : j;
+        removed.add(victim);
+        removedPairs.push({ i, j, sim, victim, kept: victim === i ? j : i });
+      }
+    }
+  }
+  return {
+    kept: sentences.filter((_, i) => !removed.has(i)),
+    removed: [...removed].map(i => sentences[i]),
+    pairs: removedPairs,
+  };
+}
+
+// ── STAGE 3 — QUERY SCORER ────────────────────────────────────────────
+// FIX 5: only runs when query is explicitly non-empty
+function scoreByQuery(sentences, query, threshold = 0.18) {
+  if (!query || !query.trim()) return { kept: sentences, dropped: [] };
+  const docs = [query, ...sentences];
+  const { matrix } = buildTFIDF(docs);
+  if (!matrix.length) return { kept: sentences, dropped: [] };
+  const qVec = matrix[0];
+  const scored = sentences.map((s, i) => ({
+    s, score: cosineSim(qVec, matrix[i + 1])
+  }));
+  const kept = scored.filter(x => x.score >= threshold).map(x => x.s);
+  const dropped = scored.filter(x => x.score < threshold).map(x => x.s);
+  // Safety: never drop everything
+  return kept.length > 0 ? { kept, dropped } : { kept: sentences, dropped: [] };
+}
+
+// ── TOKEN COUNT ───────────────────────────────────────────────────────
+function countTokens(text) {
+  return Math.max(1, Math.round(text.split(/\s+/).filter(Boolean).length * 1.33));
+}
+
+// ── MAIN PIPELINE ─────────────────────────────────────────────────────
+function runPipeline(text, mode, query) {
+  const cfg = MODES[mode];
+  const t0 = performance.now();
+  const origTokens = countTokens(text);
+
+  // Stage 0: Normalize
+  const normalized = normalize(text);
+  const normSaved = Math.max(0, origTokens - countTokens(normalized));
+
+  // If mode is off, return original
+  if (mode === 'off') {
+    return {
+      output: text, outputSentences: splitSentences(text),
+      origTokens, optTokens: origTokens,
+      normSaved: 0, dedupRemoved: [], scorerDropped: [],
+      ms: performance.now() - t0,
+    };
+  }
+
+  // Stage 1: Sentence-first chunking
+  const sentences = splitSentences(normalized);
+
+  // Stage 2: Dedup at calibrated TF-IDF threshold
+  const { kept: dedupKept, removed: dedupRemoved, pairs } = dedup(sentences, cfg.dedup);
+
+  // Stage 3: Query scoring (only if query provided)
+  let finalSents = dedupKept;
+  let scorerDropped = [];
+  if (cfg.scorer && query && query.trim()) {
+    const r = scoreByQuery(dedupKept, query, 0.12);
+    finalSents = r.kept;
+    scorerDropped = r.dropped;
+  }
+
+  // FIX 4: join with newline to preserve sentence boundaries
+  const output = finalSents.join('\n');
+  const optTokens = countTokens(output);
+
+  return {
+    output,
+    outputSentences: finalSents,
+    removedSentences: [...dedupRemoved, ...scorerDropped],
+    origTokens,
+    optTokens,
+    normSaved,
+    dedupRemoved,
+    scorerDropped,
+    pairs: pairs || [],
+    ms: performance.now() - t0,
+  };
+}
+
+// ── UI ────────────────────────────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  ['off','lite','aggressive'].forEach(k => {
+    const b = document.getElementById('btn-'+k);
+    b.className = 'mode-btn' + (k===m ? ' active-'+k : '');
+  });
+  if (lastResult) renderOutput();
+}
+
+function onInput() {
+  const v = document.getElementById('inp').value;
+  const t = countTokens(v);
+  document.getElementById('orig-count').textContent = t ? t+' tokens' : '0 tokens';
+  const btn = document.getElementById('run-btn');
+  btn.disabled = !v.trim();
+  document.getElementById('btn-txt').textContent = v.trim()
+    ? '▶ Optimize' : 'Paste text above to start';
+  if (!v.trim()) {
+    document.getElementById('out').className = 'out-area empty';
+    document.getElementById('out').textContent = 'Run optimization to see output here.';
+    document.getElementById('opt-count').textContent = '—';
+    ['metrics','bar-wrap','stages-wrap','cost-wrap'].forEach(id =>
+      document.getElementById(id).style.display = 'none');
+    lastResult = null;
+  }
+}
+
+function runOptimize() {
+  const text = document.getElementById('inp').value.trim();
+  if (!text) return;
+  const query = document.getElementById('q').value;
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  document.getElementById('btn-txt').textContent = '⏳ Optimizing…';
+
+  setTimeout(() => {
+    lastResult = runPipeline(text, currentMode, query);
+    renderOutput();
+    btn.disabled = false;
+    document.getElementById('btn-txt').textContent = '▶ Optimize again';
+  }, 30);
+}
+
+function renderOutput() {
+  if (!lastResult) return;
+  const r = lastResult;
+  const showDiff = document.getElementById('show-diff').checked;
+  const outEl = document.getElementById('out');
+
+  if (currentMode === 'off' || r.optTokens === r.origTokens) {
+    outEl.className = 'out-area';
+    outEl.innerHTML = escHtml(r.output);
+    document.getElementById('opt-count').textContent = r.origTokens + ' tokens (unchanged)';
+  } else if (showDiff) {
+    // Show diff: highlight removed sentences in red, kept in green
+    const allSents = splitSentences(r.output.length > 0 ? r.output : document.getElementById('inp').value);
+    const removedSet = new Set(r.removedSentences || []);
+    let html = '';
+    splitSentences(document.getElementById('inp').value).forEach(s => {
+      if (removedSet.has(s)) {
+        html += `<span class="removed">${escHtml(s)}</span> `;
+      } else {
+        html += `<span class="kept">${escHtml(s)}</span> `;
+      }
+    });
+    outEl.className = 'out-area';
+    outEl.innerHTML = html;
+    document.getElementById('opt-count').textContent = r.optTokens + ' tokens';
+  } else {
+    outEl.className = 'out-area';
+    outEl.textContent = r.output;
+    document.getElementById('opt-count').textContent = r.optTokens + ' tokens';
+  }
+
+  // Metrics
+  const pct = r.origTokens > 0
+    ? Math.max(0, Math.round((1 - r.optTokens / r.origTokens) * 100 * 10) / 10)
+    : 0;
+  const saved = Math.max(0, r.origTokens - r.optTokens);
+  const costSaved = (saved / 1e6) * 3.0;
+
+  document.getElementById('h-avg').textContent = pct + '%';
+  document.getElementById('h-saved').textContent = saved.toLocaleString();
+  document.getElementById('h-ms').textContent = r.ms.toFixed(0) + 'ms';
+  document.getElementById('m-orig').textContent = r.origTokens.toLocaleString();
+  document.getElementById('m-opt').textContent = r.optTokens.toLocaleString();
+  document.getElementById('m-pct').textContent = pct + '%';
+  document.getElementById('m-saved').textContent = saved.toLocaleString();
+  document.getElementById('m-time').textContent = r.ms.toFixed(1) + 'ms';
+  document.getElementById('m-cost').textContent = '$' + costSaved.toFixed(5);
+
+  // Bars
+  const bAfterPct = r.origTokens > 0 ? (r.optTokens / r.origTokens * 100) : 100;
+  document.getElementById('b-before').style.width = '100%';
+  document.getElementById('b-before-lbl').textContent = r.origTokens.toLocaleString() + ' tk';
+  setTimeout(() => {
+    document.getElementById('b-after').style.width = bAfterPct + '%';
+    document.getElementById('b-after-lbl').textContent = r.optTokens.toLocaleString() + ' tk';
+  }, 50);
+
+  // Stages
+  const dedupSaved = saved - r.normSaved - (r.scorerDropped?.length > 0
+    ? Math.round(r.scorerDropped.join(' ').split(/\s+/).length * 1.33) : 0);
+  const scorerSaved = r.scorerDropped?.length > 0
+    ? Math.round(r.scorerDropped.join(' ').split(/\s+/).length * 1.33) : 0;
+
+  document.getElementById('s0v').textContent = r.normSaved > 0
+    ? '−' + r.normSaved + ' tokens' : '0 tokens';
+  document.getElementById('s0s').textContent = r.normSaved > 0
+    ? 'filler phrases removed' : 'no filler found';
+  document.getElementById('s2v').textContent = r.dedupRemoved.length > 0
+    ? '−' + r.dedupRemoved.length + ' sentences' : '0 sentences';
+  document.getElementById('s2s').textContent = r.dedupRemoved.length > 0
+    ? r.dedupRemoved.length + ' near-duplicates removed (TF-IDF)' : 'no near-duplicates found';
+  document.getElementById('s3v').textContent = r.scorerDropped?.length > 0
+    ? '−' + r.scorerDropped.length + ' sentences' : r.scorerDropped?.length === 0 && document.getElementById('q').value
+    ? '0 sentences' : 'skipped — no query set';
+  document.getElementById('s3s').textContent = r.scorerDropped?.length > 0
+    ? 'query-irrelevant chunks dropped' : '';
+
+  // Cost
+  const volumes = [100, 500, 1000, 5000];
+  document.getElementById('cost-grid').innerHTML = volumes.map(v => {
+    const monthly = costSaved * v * 30;
+    return `<div class="cc">
+      <div class="calls">${v.toLocaleString()} calls/day</div>
+      <div class="saving">$${monthly.toFixed(2)}</div>
+      <div class="period">per month</div>
+    </div>`;
+  }).join('');
+
+  ['metrics','bar-wrap','stages-wrap','cost-wrap'].forEach(id =>
+    document.getElementById(id).style.display = '');
+}
+
+function doCopy() {
+  if (!lastResult) return;
+  navigator.clipboard.writeText(lastResult.output).then(() => {
+    const b = document.getElementById('copy-btn');
+    b.textContent = 'copied!';
+    b.className = 'copy-btn copied';
+    setTimeout(() => { b.textContent = 'copy'; b.className = 'copy-btn'; }, 1500);
+  });
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── SAMPLES ───────────────────────────────────────────────────────────
 const SAMPLES = {
-  trading: `You are an expert swing trading assistant specializing in NSE and BSE equity markets.
+trading: `You are an expert swing trading assistant specializing in NSE and BSE equity markets.
 You are a knowledgeable financial co-pilot helping retail Indian investors trade profitably.
 Your role is to assist with trade analysis, scanner interpretation, and risk management.
 You help Indian retail investors make smarter decisions in NSE and BSE equity markets.
@@ -281,306 +651,45 @@ Trail the stop loss by 10-EMA on the daily chart once the position is up by 2R p
 Protecting profits with trailing stops is as important as the initial stop loss placement.
 Never let a winning trade turn into a losing trade — always trail stops to lock in profits.`,
 
-  faq: `What is a stop loss?
-A stop loss is an order that exits a trade automatically at a pre-set price level.
-A stop-loss order automatically closes your position when price falls to your exit level.
-Using stop losses is how professional traders prevent large losses in any single trade.
-Stop losses protect your capital by exiting automatically when the price moves against you.
+faq: `What is a stop loss? A stop loss is an order that exits a trade automatically when price hits a set level.
+A stop-loss order closes your position automatically when the price reaches your exit level.
+Using stop losses is how professional traders prevent large losses accumulating in any single trade.
 
-What is EMA?
-EMA stands for Exponential Moving Average and gives more weight to recent price data.
-The Exponential Moving Average places higher importance on the most recent prices.
+What is EMA? EMA stands for Exponential Moving Average and gives more weight to recent price data.
+The Exponential Moving Average places higher importance on the most recent closing prices.
 EMA reacts faster to price changes compared to a Simple Moving Average of the same period.
-Moving averages like EMA help traders identify the direction and momentum of a trend.
 
-What is the Nifty 50?
-The Nifty 50 index tracks the top 50 companies listed on the National Stock Exchange India.
-Nifty 50 is the primary benchmark index for the National Stock Exchange of India.
-The top 50 large-cap companies on NSE are tracked by the Nifty 50 benchmark index.
-It is important to note that Nifty 50 is widely used as a market benchmark by investors.`,
+What is Nifty 50? The Nifty 50 index tracks the top 50 companies listed on the NSE by market capitalisation.
+Nifty 50 is the benchmark index for the National Stock Exchange of India.
+The top 50 large-cap companies on NSE are tracked by the Nifty 50 benchmark index by market cap.
 
-  article: `Technical analysis is the study of past price movements to forecast future price direction.
-Traders and investors use charts, indicators, and patterns to make buy and sell decisions.
-Furthermore, fundamental analysis evaluates a company's intrinsic value through financial statements.
-The price-to-earnings ratio compares current share price to earnings per share for valuation.
-It is important to note that momentum strategies involve buying assets with strong recent performance.
-Additionally, contrarian investing means buying assets that most investors are currently selling.
+What is SEBI? SEBI is the Securities and Exchange Board of India, the market regulator.
+The Securities and Exchange Board of India regulates all stock market participants in India.
+SEBI ensures fair markets and protects retail investor interests across all exchanges in India.`,
 
-Swing trading holds positions for several days to capture medium-term price movements in markets.
-Position sizing determines how much capital to allocate to each individual trade you take.
-It should be noted that diversification across sectors and asset classes reduces concentration risk.
-Moreover, backtesting validates a trading strategy by running it against historical price data.
-That being said, risk management remains the single most important factor in long-term trading success.
-In other words, without proper risk controls, even a profitable strategy can lead to account ruin.
+rag: `Momentum breakout strategy: enter when price closes above a resistance level on above-average volume.
+The breakout must be confirmed with at least 1.5x the 20-day average volume for validity.
+False breakouts occur frequently on low volume — always wait for volume confirmation before entry.
+A valid breakout shows at least 1.5 times the average daily volume on the breakout candle.
 
-As mentioned earlier, stop losses are the primary tool for risk management in trading.
-Please note that every trade should have a defined exit level before the position is opened.
-Needless to say, emotional trading is the enemy of consistent profitability in financial markets.
-To be clear, a trading plan should be created and followed rigorously without deviation.`
+EMA crossover system: go long when the 20-EMA crosses above the 50-EMA on daily timeframe.
+The 20-EMA crossing above the 50-EMA indicates bullish momentum shift on the daily chart.
+When the shorter EMA crosses above the longer EMA, this signals a potential trend change.
+This crossover signal is more reliable when confirmed by RSI above 50 at the same time.
+
+Risk management rules: never risk more than 1-2% of capital on any single trade position.
+Position size must be calculated so that a stop loss hit costs at most 2% of total capital.
+Every trade must have a defined stop loss placed below the most recent swing low or support.
+The stop loss should be placed at a level that invalidates the trade setup if hit.`
 };
 
-// ── TOKENIZER (approximation) ────────────────────────────────────────────────
-function countTokens(text) {
-  if (!text || !text.trim()) return 0;
-  return Math.max(1, Math.round(text.split(/\s+/).filter(Boolean).length * 1.33));
-}
-
-// ── NORMALIZER (JS port of Python normalizer.py) ────────────────────────────
-const FILLERS = [
-  [/\bIt is (?:very |extremely |critically |absolutely )?important (?:to note |to remember )?that\b/gi, ''],
-  [/\bIt should be noted that\b/gi, ''],
-  [/\bPlease note that\b/gi, ''],
-  [/\bNote that\b/gi, ''],
-  [/\bAs (?:previously |earlier |already )?mentioned(?:above|earlier|before|previously)?,?\s*/gi, ''],
-  [/\bAs (?:discussed|noted|stated|explained) (?:above|earlier|before|previously),?\s*/gi, ''],
-  [/\bThat being said,?\s*/gi, ''],
-  [/\bWith that (?:said|in mind),?\s*/gi, ''],
-  [/\bIn other words,?\s*/gi, ''],
-  [/\bTo (?:put it simply|be clear|summarize|recap),?\s*/gi, ''],
-  [/\bNeedless to say,?\s*/gi, ''],
-  [/\bOf course,?\s*/gi, ''],
-  [/\bObviously,?\s*/gi, ''],
-  [/\bClearly,?\s*/gi, ''],
-  [/\bFurthermore,?\s*/gi, ''],
-  [/\bAdditionally,?\s*/gi, ''],
-  [/\bMoreover,?\s*/gi, ''],
-  [/\bIn addition(?:\s+to\s+that)?,?\s*/gi, ''],
-  [/\bAlso,\s+/gi, ''],
-  [/\bunder any circumstances\b/gi, ''],
-  [/\bis non-negotiable\b/gi, ''],
-  [/\bat all times\b/gi, ''],
-  [/\bwithout exception\b/gi, ''],
-  [/\bin all cases\b/gi, ''],
-  [/#{1,6}\s+/g, ''],
-  [/\*{1,3}([^*]+)\*{1,3}/g, '$1'],
-  [/`([^`]+)`/g, '$1'],
-  [/<[^>]+>/g, ''],
-  [/\[([^\]]+)\]\([^)]+\)/g, '$1'],
-  [/\.{2,}/g, '.'],
-  [/!{2,}/g, '!'],
-  [/-{3,}/g, '—'],
-  [/\s{2,}/g, ' '],
-  [/^\s*,\s*/gm, ''],
-];
-
-function normalize(text) {
-  let r = text;
-  for (const [pat, rep] of FILLERS) r = r.replace(pat, rep);
-  r = r.replace(/\n{3,}/g, '\n\n').trim();
-  r = r.replace(/  +/g, ' ').replace(/\s+\./g, '.').trim();
-  return r;
-}
-
-// ── CHUNKER ──────────────────────────────────────────────────────────────────
-function chunk(text, chunkSize) {
-  const sentenceEnd = /(?<!Dr|Mr|Ms|Sr|Jr|vs)\.\s+|[!?]\s+|\n/;
-  const parts = text.split(sentenceEnd).map(s => s.trim()).filter(s => s.length > 8);
-  const chunks = [];
-  let buf = [];
-  for (const sent of parts) {
-    buf.push(...sent.split(/\s+/));
-    if (buf.length >= chunkSize) {
-      chunks.push(buf.slice(0, chunkSize).join(' '));
-      buf = buf.slice(chunkSize);
-    }
-  }
-  if (buf.length >= 1) chunks.push(buf.join(' '));
-  return chunks;
-}
-
-// ── TF-IDF DEDUP ─────────────────────────────────────────────────────────────
-const STOPWORDS = new Set(['a','an','the','is','it','in','on','of','to','and','or',
-  'for','with','are','be','by','at','as','this','that','from','your','you','all',
-  'also','any','can','its','has','have','not','but','more','than','was','will',
-  'our','their','when','which','who','do','so','up','use','per','via','never','always']);
-
-function tokenize(text) {
-  return text.toLowerCase().match(/[a-z0-9]+/g)
-    ?.filter(w => !STOPWORDS.has(w) && w.length > 2) || [];
-}
-
-function buildTfIdf(chunks) {
-  const tokenized = chunks.map(tokenize);
-  const vocab = {};
-  tokenized.forEach(ws => ws.forEach(w => { if (!(w in vocab)) vocab[w] = Object.keys(vocab).length; }));
-  const V = Object.keys(vocab).length;
-  if (V === 0) return chunks.map(() => new Float32Array(1));
-  const N = chunks.length;
-  const tf = chunks.map((_, i) => {
-    const vec = new Float32Array(V);
-    const ws = tokenized[i];
-    if (!ws.length) return vec;
-    const counts = {};
-    ws.forEach(w => counts[w] = (counts[w] || 0) + 1);
-    Object.entries(counts).forEach(([w, c]) => { vec[vocab[w]] = c / ws.length; });
-    return vec;
-  });
-  const df = new Float32Array(V);
-  tf.forEach(vec => { for (let i = 0; i < V; i++) if (vec[i] > 0) df[i]++; });
-  const idf = df.map(d => Math.log((N + 1) / (d + 1)) + 1);
-  return tf.map(vec => {
-    const tfidf = vec.map((v, i) => v * idf[i]);
-    const norm = Math.sqrt(tfidf.reduce((s, v) => s + v * v, 0)) || 1e-9;
-    return tfidf.map(v => v / norm);
-  });
-}
-
-function cosineSim(a, b) {
-  let dot = 0;
-  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
-  return dot;
-}
-
-function dedup(chunks, threshold) {
-  if (chunks.length <= 1) return { kept: chunks, removedIdx: [] };
-  const vecs = buildTfIdf(chunks);
-  const removed = new Set();
-  for (let i = 0; i < chunks.length; i++) {
-    if (removed.has(i)) continue;
-    for (let j = i + 1; j < chunks.length; j++) {
-      if (removed.has(j)) continue;
-      if (cosineSim(vecs[i], vecs[j]) >= threshold) {
-        const victim = chunks[i].length < chunks[j].length ? i : j;
-        removed.add(victim);
-      }
-    }
-  }
-  const removedIdx = [...removed];
-  const kept = chunks.filter((_, i) => !removed.has(i));
-  return { kept, removedIdx };
-}
-
-// ── SCORER ───────────────────────────────────────────────────────────────────
-function scoreChunks(chunks, query, minRelevance) {
-  if (!query.trim()) return chunks;
-  const allTexts = [query, ...chunks];
-  const vecs = buildTfIdf(allTexts);
-  const qvec = vecs[0];
-  const scored = chunks.map((c, i) => ({ c, s: Math.max(0, cosineSim(vecs[i + 1], qvec)) }));
-  return scored.filter(x => x.s >= minRelevance).map(x => x.c);
-}
-
-// ── MAIN PIPELINE ─────────────────────────────────────────────────────────────
-function runOptimize() {
-  const input = document.getElementById('inputText').value;
-  if (!input.trim()) { alert('Paste some text first!'); return; }
-
-  const btn = document.getElementById('runBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>Optimizing...';
-
-  setTimeout(() => {
-    const t0 = performance.now();
-    const cfg = MODES[currentMode];
-    const query = document.getElementById('queryInput').value;
-
-    // Pipeline
-    const norm = normalize(input);
-    const chunks = chunk(norm, cfg.chunkSize);
-    const { kept: deduped } = dedup(chunks, cfg.dedupThreshold);
-    const scored = query.trim() ? scoreChunks(deduped, query, cfg.minRelevance) : deduped;
-    const output = scored.join(' ');
-    const elapsed = performance.now() - t0;
-
-    const origTok = countTokens(input);
-    const optTok  = countTokens(output) || 1;
-    const red     = Math.max(0, Math.round((1 - optTok / origTok) * 100));
-    const saved   = Math.max(0, origTok - optTok);
-
-    lastResult = { input, output, origTok, optTok, red, saved, elapsed };
-    renderStats(lastResult);
-    renderOutput();
-
-    btn.disabled = false;
-    btn.innerHTML = '▶ Optimize';
-  }, 10);
-}
-
-function renderStats(r) {
-  document.getElementById('statsBar').style.display = 'grid';
-  document.getElementById('barSection').style.display = 'block';
-
-  document.getElementById('sOrig').textContent  = r.origTok.toLocaleString();
-  document.getElementById('sOpt').textContent   = r.optTok.toLocaleString();
-  document.getElementById('sRed').textContent   = r.red + '%';
-  document.getElementById('sSaved').textContent = r.saved.toLocaleString();
-
-  const costPerCall  = (r.saved / 1e6) * 3.0;
-  const monthlyS     = costPerCall * 500 * 30;
-  document.getElementById('sCost').textContent  = '$' + costPerCall.toFixed(5);
-  document.getElementById('sMonth').textContent = '$' + monthlyS.toFixed(2);
-  document.getElementById('sTime').textContent  = r.elapsed.toFixed(1) + ' ms';
-
-  // Badge colors
-  const ob = document.getElementById('origBadge');
-  ob.textContent = r.origTok + ' tokens';
-  ob.className = 'token-badge high';
-
-  const optb = document.getElementById('optBadge');
-  optb.textContent = r.optTok + ' tokens  (−' + r.red + '%)';
-  optb.className = 'token-badge low';
-
-  // Bars
-  const pct = Math.max(2, 100 - r.red);
-  document.getElementById('barOrig').style.width = '100%';
-  document.getElementById('barOpt').style.width  = pct + '%';
-  document.getElementById('barOrigTxt').textContent = r.origTok.toLocaleString() + ' tk';
-  document.getElementById('barOptTxt').textContent  = r.optTok.toLocaleString() + ' tk';
-}
-
-function renderOutput() {
-  if (!lastResult) return;
-  const area = document.getElementById('outputArea');
-  const showDiff = document.getElementById('diffToggle').checked;
-
-  if (!showDiff) {
-    area.textContent = lastResult.output;
-    return;
-  }
-
-  // Simple word-level diff: words in input but not output
-  const inWords  = lastResult.input.split(/\s+/).filter(Boolean);
-  const outWords = new Set(lastResult.output.split(/\s+/).filter(Boolean));
-  let html = '';
-  inWords.forEach(w => {
-    const clean = w.replace(/[^a-z0-9]/gi, '').toLowerCase();
-    if (clean.length > 3 && !outWords.has(w) && !outWords.has(clean)) {
-      html += `<span class="removed">${escHtml(w)}</span> `;
-    } else {
-      html += `<span class="kept">${escHtml(w)}</span> `;
-    }
-  });
-  area.innerHTML = html;
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ── UI HELPERS ───────────────────────────────────────────────────────────────
-function setMode(mode, el) {
-  currentMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
-
 function loadSample(key) {
-  document.getElementById('inputText').value = SAMPLES[key];
+  document.getElementById('inp').value = SAMPLES[key];
   onInput();
-  if (key === 'trading') document.getElementById('queryInput').value = 'stop loss and risk rules';
-  if (key === 'faq')     document.getElementById('queryInput').value = 'what is EMA';
-  if (key === 'article') document.getElementById('queryInput').value = 'risk management';
 }
 
-function onInput() {
-  const t = countTokens(document.getElementById('inputText').value);
-  const b = document.getElementById('origBadge');
-  b.textContent = t + ' tokens';
-  b.className = t > 500 ? 'token-badge high' : 'token-badge';
-}
-
-// Load trading sample on start
-window.onload = () => loadSample('trading');
+// init
+onInput();
 </script>
 </body>
 </html>

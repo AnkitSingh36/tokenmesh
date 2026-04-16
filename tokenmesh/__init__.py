@@ -25,5 +25,5 @@ Drop-in Claude client::
 
 from tokenmesh.pipeline import OptimizeResult, TokenMesh, TokenMeshAggressive, TokenMeshLite
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __all__ = ["TokenMesh", "TokenMeshLite", "TokenMeshAggressive", "OptimizeResult"]

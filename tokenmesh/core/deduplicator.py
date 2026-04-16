@@ -4,16 +4,21 @@ Semantic deduplicator.
 Embeds text chunks and removes near-duplicates based on cosine similarity,
 keeping the most information-dense representative from each cluster.
 
-Fixes vs v0.1:
-  BUG #1  Victim was chosen by len(embedding_vector) which is always 384
-          for every chunk — now correctly uses len(chunk.text).
-  GAP #4  Returns normalized embeddings so scorer can reuse them,
-          eliminating a second model.encode() call.
+Fixes:
+  v0.2.0  BUG #1  Victim chosen by len(embedding_vector) — always 384, always
+                   dropped j. Now correctly uses len(chunk.text).
+  v0.2.0  GAP #4  Returns normalized embeddings so scorer can reuse them.
+  v0.2.1  GUARD   Chunks containing specific numeric values (ratios, multipliers,
+                   named thresholds like 1:2, 1.5x, 10-EMA, breakeven, 2R) are
+                   marked as protected and NEVER dropped as the victim — even when
+                   similarity exceeds the threshold. These carry precise rules that
+                   have no equivalent elsewhere in the prompt.
 """
 
 from __future__ import annotations
 
 import logging
+import re
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -24,6 +29,36 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _EMBED_MODEL = None  # Lazy singleton
+
+# ── Numeric guard ─────────────────────────────────────────────────────────────
+# Matches specific numeric values that indicate a unique rule:
+#   1:2  (risk-reward ratio)
+#   1.5x (volume multiplier)
+#   10-EMA, 20-EMA, 50-EMA (named moving averages)
+#   1R, 2R, 3R (risk multiples)
+#   breakeven (specific trade management instruction)
+#   any pattern like \d+% \d+x \d+:\d
+_NUMERIC_GUARD = re.compile(
+    r"""
+    \b\d+:\d+\b             |   # ratio like 1:2, 2:1
+    \b\d+\.?\d*[xX]\b       |   # multiplier like 1.5x, 2x
+    \b\d+-?EMA\b             |   # named EMA like 10-EMA, 20EMA
+    \b\d+[Rr]\b              |   # risk multiple like 1R, 2R
+    \bbreakeven\b                # specific instruction keyword
+    """,
+    re.VERBOSE | re.IGNORECASE,
+)
+
+
+def _is_protected(text: str) -> bool:
+    """
+    Return True if this chunk contains specific numeric values that make it
+    unique and must never be dropped as a duplicate.
+
+    A chunk can still be KEPT when its pair is the victim — this guard only
+    prevents a chunk from being chosen as the victim to drop.
+    """
+    return bool(_NUMERIC_GUARD.search(text))
 
 
 def _get_embedder():
@@ -47,6 +82,8 @@ class SemanticDeduplicator:
     Removes near-duplicate chunks using embedding cosine similarity.
 
     From each duplicate pair the LONGER (more informative) chunk is kept.
+    Chunks containing specific numeric values are additionally protected from
+    being dropped — see module-level _NUMERIC_GUARD for what qualifies.
 
     Args:
         threshold:   Cosine similarity above which chunks are duplicates.
@@ -108,10 +145,11 @@ class SemanticDeduplicator:
         """
         Vectorised greedy dedup using a precomputed similarity matrix.
 
-        FIX #1: victim is now chosen by len(chunk.text) — the shorter text
-        is dropped, keeping the more detailed chunk. Previously this used
-        len(embedding_vector) which is the same value (384) for every chunk,
-        causing the wrong chunk to always be dropped.
+        Victim selection priority:
+          1. If both chunks are protected (contain specific numeric values):
+             keep both — never drop either.
+          2. If one chunk is protected: drop the OTHER one.
+          3. Otherwise: drop the shorter chunk (less informative).
         """
         sim_matrix = normed @ normed.T   # shape (N, N), values in [-1, 1]
         n = len(chunks)
@@ -124,8 +162,20 @@ class SemanticDeduplicator:
                 if j in removed:
                     continue
                 if sim_matrix[i, j] >= self.threshold:
-                    # Keep the longer (more informative) chunk
-                    victim = i if len(chunks[i].text) < len(chunks[j].text) else j
+                    i_protected = _is_protected(chunks[i].text)
+                    j_protected = _is_protected(chunks[j].text)
+
+                    if i_protected and j_protected:
+                        # Both carry unique numeric rules — keep both
+                        continue
+                    elif i_protected:
+                        victim = j   # i is protected, must drop j
+                    elif j_protected:
+                        victim = i   # j is protected, must drop i
+                    else:
+                        # Neither protected — drop the shorter (less detailed)
+                        victim = i if len(chunks[i].text) < len(chunks[j].text) else j
+
                     removed.add(victim)
 
         return set(range(n)) - removed

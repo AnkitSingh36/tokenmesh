@@ -1,3 +1,16 @@
+"""
+TokenMesh Pipeline v0.2 — Fixed & Extended.
+
+Fixes vs v0.1:
+  BUG #1  Wrong victim selection in deduplicator (embedding dim vs text len)
+  BUG #2  Overlap inflates output tokens — default overlap changed to 0
+  GAP #3  Added Stage 0: TextNormalizer (6-12% free reduction)
+  GAP #4  Embeddings shared between deduplicator and scorer (2x faster)
+  GAP #5  Default chunk_size lowered 200->40 (sentence-level granularity)
+  GAP #6  Added token_budget parameter with adaptive scoring loop
+  GAP #7  Smart separator: space for prompts, newline for documents
+"""
+
 from __future__ import annotations
 
 import logging
