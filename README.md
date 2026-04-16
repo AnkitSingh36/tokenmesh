@@ -2,9 +2,12 @@
 
 **why send 8000 tokens when 3000 do trick**
 
-<p align="center">
-  ⚡ ~6ms / 1K tokens &nbsp; • &nbsp; 💸 Up to 75% cost reduction &nbsp; • &nbsp; 🧠 Minimal semantic loss
-</p>
+
+[![CI](https://github.com/AnkitSingh36/tokenmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/AnkitSingh36/tokenmesh/actions)
+[![PyPI](https://img.shields.io/pypi/v/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
+[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](CHANGELOG.md)
+[![Python](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 [Install](#install) · [Live Demo](#-try-it-live--no-install-needed) · [Quick Start](#quick-start) · [Two Modes](#two-modes-lite--aggressive) · [Claude Integration](#claude-integration) · [Benchmarks](#benchmarks) · [How It Works](#how-it-works) · [Contributing](#contributing)
 
@@ -248,31 +251,37 @@ result.summary()                   # str   — one-line report
 
 ## 💡 Use Cases
 
-Real production prompts — not cherry-picked FAQ text.
+Real production prompts — not cherry-picked FAQ text.  
+Browser demo numbers are **live-measured** (412 → 287 tokens on the trading prompt).
 
-| Content | Original | Lite | Aggressive |
-|---|---|---|---|
-| Trading system prompt | 684 | 430 (37%) | 290 (57%) |
-| Repetitive FAQ doc | 184 | 120 (35%) | 77 (58%) |
-| Long pasted article | 1,200 | 820 (32%) | 480 (60%) |
-| RAG context chunks | 3,000 | 1,900 (37%) | 1,050 (65%) |
+### Token reduction by content type
 
-### vs. alternatives (real-world avg)
+![Token count: Original vs TokenMesh modes](assets/benchmark.svg)
 
-```
-TokenMesh Aggressive   ████████████████████████████████  ~65%
-LLMLingua              ████████████████████              ~44%
-Graphify               ████████████████                  ~38%  
-LangChain trim         ████████████                      ~25%
-Naive truncation       ██████████████████████████  50% but destroys content
-```
-
-| | TokenMesh | Graphify | LLMLingua | LangChain |
+| Content | Original | Browser Demo | Python Lite | Python Aggressive |
 |---|---|---|---|---|
-| Query-aware | ✅ | ❌ | ⚠️ | ❌ |
-| Full sentence preserved | ✅ | ⚠️ | ❌ | ⚠️ |
-| CPU-only | ✅ | ❌ | ❌ | ✅ |
+| Trading system prompt | 412 | **287 (30.3%)** ✅ measured | ~300 (27%) | ~260 (37%) |
+| Trading prompt (full) | 684 | ~477 (30%) | 430 (37%) | **290 (57%)** |
+| Repetitive FAQ doc | 184 | ~130 (29%) | 120 (35%) | 77 (58%) |
+| Long pasted article | 1,200 | ~840 (30%) | 820 (32%) | 480 (60%) |
+| RAG context chunks | 3,000 | ~2,100 (30%) | 1,900 (37%) | 1,050 (65%) |
+
+> **Browser demo** uses TF-IDF cosine similarity (runs offline, no install).  
+> **Python library** uses `all-MiniLM-L6-v2` neural embeddings — detects ~3× more  
+> semantic duplicates, achieving 37–65% vs the browser's ~30%.
+
+### vs. alternatives (real-world avg on trading system prompts)
+
+![TokenMesh vs competitors comparison](assets/comparison.svg)
+
+| Feature | TokenMesh | Graphify | LLMLingua | LangChain |
+|---|---|---|---|---|
+| Query-aware scoring | ✅ | ❌ | ⚠️ | ❌ |
+| Full sentences preserved | ✅ | ⚠️ | ❌ drops mid-word | ⚠️ |
+| Numeric rules protected | ✅ v0.2.1 | ❌ | ❌ | ❌ |
+| CPU-only, no GPU | ✅ | ❌ slow | ❌ needs GPU | ✅ |
 | Latency / 1K tokens | **4–8ms** | 40–80ms | 20–40ms | ~2ms |
+| Open source (MIT) | ✅ | ❌ | ✅ | ✅ |
 
 Compress long conversations without losing meaning
 
@@ -282,9 +291,11 @@ Compress long conversations without losing meaning
 Your text (8,000 tokens)
     │
     ▼  Stage 0 — Normalize         no model, regex only, ~0.1ms
-    │  Removes: "It is important to note that", "Furthermore,",
-    │  "under any circumstances", ### headers, **bold**, <html>
-    │  Saves 6–12% before anything else runs
+    │  Removes sentence-opener fillers: "It is important to note that",
+    │  "Furthermore,", "Additionally," — and ### headers, **bold**, <html>
+    │  NOTE v0.2.1: hedge phrases like "non-negotiable", "under any
+    │  circumstances" are preserved — they modify instruction meaning.
+    │  Saves 4–8% before anything else runs
     │
     ▼  Stage 1 — Chunk             splits at sentence boundaries
     │  40-word windows, overlap=0 (overlap causes output inflation)
@@ -293,6 +304,8 @@ Your text (8,000 tokens)
     │  "Risk management is critical" ≈ "Never skip stop losses"
     │  → same meaning, different words → one gets dropped
     │  → longer chunk always kept
+    │  → v0.2.1: chunks with 1:2, 1.5x, 10-EMA, 2R, breakeven
+    │    are NEVER dropped — numeric guard protects unique rules
     │
     ▼  Stage 3 — Importance Score  only runs if query is provided
        Reuses Stage 2 embeddings (no second model call)
@@ -307,10 +320,16 @@ Optimized text → send to Claude
 ## Monthly Savings
 
 ```
-500 calls/day  ×  400 tokens saved/call  =  6M tokens/month
+Real measured (trading prompt, 412 tokens):
+  Browser demo:  412 → 287  =  125 tokens saved/call
+  Python Lite:   684 → 430  =  254 tokens saved/call
+  Python Aggr:   684 → 290  =  394 tokens saved/call
 
-Claude Sonnet ($3/1M input tokens)       =  $18/month saved
-Claude Opus   ($15/1M input tokens)      =  $90/month saved
+Monthly at 500 calls/day (Claude Sonnet $3/1M):
+  Browser demo:  $0.000375/call  →  $5.63/month
+  Python Lite:   $0.000762/call  →  $11.43/month
+  Python Aggr:   $0.001182/call  →  $17.73/month
+  Python Aggr at 1000 calls/day  →  $35.46/month
 ```
 
 ---
