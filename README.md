@@ -5,9 +5,9 @@
 
 [![CI](https://github.com/AnkitSingh36/tokenmesh/actions/workflows/ci.yml/badge.svg)](https://github.com/AnkitSingh36/tokenmesh/actions)
 [![PyPI](https://img.shields.io/pypi/v/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
-[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
-[![Node](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://www.npmjs.com/package/tokenmesh-lib)
+[![npm](https://img.shields.io/npm/v/tokenmesh-lib.svg)](https://www.npmjs.com/package/tokenmesh-lib)
+[![npm downloads](https://img.shields.io/npm/dw/tokenmesh-lib.svg)](https://www.npmjs.com/package/tokenmesh-lib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 [Install](#install) · [Live Demo](#-try-it-live--no-install-needed) · [Quick Start](#quick-start) · [Two Modes](#two-modes-lite--aggressive) · [Claude Integration](#claude-integration) · [Benchmarks](#benchmarks) · [How It Works](#how-it-works) · [Contributing](#contributing)
