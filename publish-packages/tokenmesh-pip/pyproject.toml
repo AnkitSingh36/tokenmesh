@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tokenmesh"
+version = "0.2.1"
+description = "A semantic token optimizer for LLM prompts — reduce tokens, preserve meaning"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [
+  { name = "Ankit Singh", email = "your-email@example.com" }
+]
+keywords = ["llm", "token", "optimization", "claude", "anthropic", "nlp", "semantic"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+  "anthropic>=0.25.0",
+  "sentence-transformers>=2.7.0",
+  "numpy>=1.24.0",
+  "tiktoken>=0.7.0",
+]
+
+[project.optional-dependencies]
+faiss = ["faiss-cpu>=1.8.0"]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.4",
+  "mypy>=1.9",
+]
+all = ["faiss-cpu>=1.8.0"]
+
+[project.urls]
+Homepage = "https://github.com/ankitsingh36/tokenmesh"
+Repository = "https://github.com/ankitsingh36/tokenmesh"
+Issues = "https://github.com/ankitsingh36/tokenmesh/issues"
+Documentation = "https://github.com/ankitsingh36/tokenmesh#readme"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tokenmesh*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
