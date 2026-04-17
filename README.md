@@ -7,6 +7,7 @@
 [![PyPI](https://img.shields.io/pypi/v/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
 [![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://pypi.org/project/tokenmesh)
+[![Node](https://img.shields.io/pypi/pyversions/tokenmesh.svg)](https://www.npmjs.com/package/tokenmesh-lib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 [Install](#install) · [Live Demo](#-try-it-live--no-install-needed) · [Quick Start](#quick-start) · [Two Modes](#two-modes-lite--aggressive) · [Claude Integration](#claude-integration) · [Benchmarks](#benchmarks) · [How It Works](#how-it-works) · [Contributing](#contributing)
@@ -43,52 +44,105 @@ Supports all three modes: Default · Lite · Aggressive.
 
 ---
 
+
 ## Install
+
+### Python (PyPI)
 
 ```bash
 pip install tokenmesh
 ```
 
-Works on Python 3.9+, CPU-only, Windows/Mac/Linux.
+### Node.js (NPM)
 
-> **First run** downloads `all-MiniLM-L6-v2` (22 MB) once. Cached forever after.
+```bash
+npm install tokenmesh-lib
+```
 
 ---
 
 ## Quick Start
 
-### Compress any text
+### Python Example
 
 ```python
 from tokenmesh import TokenMesh
 
 tm = TokenMesh()
-result = tm.optimize(your_text, query="what is the refund policy?")
 
-print(result.optimized_text)       # send this to Claude
-print(result.reduction_percent)    # e.g. 54.2
-print(result.summary())
-# TokenMesh | 4,200 → 1,930 tokens (54.0% reduction) | $0.0068 saved | 38ms
-```
+text = """
+You are an expert trading assistant.
+Always use risk management.
+Always use stop loss.
+Never trade without stop loss.
+Risk management is very important.
+"""
 
-### With Claude API
+result = tm.optimize(text)
 
-```python
-from tokenmesh.integrations.claude import TokenMeshClaude
-
-client = TokenMeshClaude()   # reads ANTHROPIC_API_KEY from env
-
-response = client.chat(
-    system=your_long_system_prompt,
-    user="SHRIRAMFIN broke above 20-EMA with volume. Entry?",
-    model="claude-sonnet-4-20250514",
-)
-
-print(response.content)
-print(f"Saved {response.token_savings} tokens (${response.savings_usd:.4f})")
+print(result.optimized_text)
+print("Reduction:", result.reduction_percent, "%")
 ```
 
 ---
+
+### Node.js Example (Command Line)
+
+```bash
+node -e "const { TokenMesh } = require('tokenmesh-lib');
+
+const tm = new TokenMesh();
+
+const text = 'You are an expert trading assistant. Always use risk management. Always use stop loss. Never trade without stop loss. Risk management is very important.';
+
+const result = tm.optimize(text);
+
+console.log('--- Optimized ---');
+console.log(result.optimizedText);
+console.log('Reduction:', result.reductionPercent, '%');"
+```
+
+---
+
+### Aggressive Mode
+
+#### Python
+
+```python
+from tokenmesh import TokenMeshAggressive
+
+tm = TokenMeshAggressive()
+result = tm.optimize(text)
+
+print(result.optimized_text)
+```
+
+#### Node.js
+
+```bash
+node -e "const { TokenMeshAggressive } = require('tokenmesh-lib');
+
+const tm = new TokenMeshAggressive();
+
+const text = 'You are an expert trading assistant. Always use risk management. Always use stop loss. Never trade without stop loss. Risk management is very important.';
+
+const result = tm.optimize(text);
+
+console.log(result.optimizedText);
+console.log('Reduction:', result.reductionPercent, '%');"
+```
+
+---
+
+## Example Output
+
+```
+You are an expert trading assistant.
+Never trade without stop loss.
+Risk management is very important.
+
+Reduction: ~30–60%
+
 
 ## Two Modes: Lite & Aggressive
 
